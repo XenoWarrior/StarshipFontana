@@ -1,5 +1,4 @@
 # Starship Fontana #
-
 This is an example C++ application using the SDL library.
 It tries to be as nicely C++11 as possible but do keep in
 mind that SDL is written in C and, at some stage, you have
@@ -14,29 +13,57 @@ of Commander Fontana in **Starship Fontana**.
 
 ## Installation ##
 You will have to have the SDL development libraries installed on
-your system.  The easiest way to compile is to use a command-line
+your system.
+
+This installation guide assumes the use of **Fedora**.
+
+Start by installing the required libraries:
+
+* Groups:
+* * C Development Tools and Libraries
+* Packages:
+* * SDL2-devel
+* * SDL2_image-devel
+* * gcc-c++
+
+You can run the commands below to fetch these libraries:
 
 ```bash
-$ g++ -c src/*.cpp
-$ g++ -o starship *.o -lSDL2 -lSDL2_image
+  $ yum groupinstall "C Development Tools and Libraries"
+  $ yum install SDL2-devel SDL2_image-devel gcc-c++
 ```
 
-which will produce an executable file called "starship" in the
-top-level directory.  To execute this file do the following
+The easiest way to compile is to use a command-line.
+The commands below will compile the game into an executable file `starship` in the
+top-level directory:
 
-`$ ./starship`
+```bash
+  $ g++ -c src/*.cpp
+  $ g++ -o starship *.o -l SDL2 -l SDL2_image
+```
+
+To run the compiled game do the following:
+
+```bash
+  $ ./starship
+```
  
-from the top-level directory.  The game will expect to find the
+From the top-level directory, the game will expect to find the
 `assets` directory under its current working directory.
 
+* Repo
+* * **starship** (executable)
+* * **assets** (folder)
+* * src (folder)
+* * [etc ...]
+
 ## Issues ##
-I think the SDL port has introduced some bounding box collision issues.
+* SDL1 to SDL2 port introduced bounding box collision issues.
 
 ## Credits ##
 The sprites in this game come directly from 
 [SpriteLib](http://www.widgetworx.com/widgetworx/portfolio/spritelib.html) and are used
 under the terms of the [CPL 1.0](http://opensource.org/licenses/cpl1.0.php).
-
 
 The event system is based on [Libsigc++](http://libsigc.sourceforge.net/)
 and is used under the [LGPL](http://www.gnu.org/copyleft/lgpl.html).
