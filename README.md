@@ -12,7 +12,7 @@ Earth’s hero? Puzzle your way though the universe in the company
 of Commander Fontana in **Starship Fontana**.
 
 ## Installation ##
-You will have to have the SDL development libraries installed on
+You will need the SDL development libraries installed on
 your system.
 
 This installation guide assumes the use of **Fedora**.
@@ -67,3 +67,5 @@ under the terms of the [CPL 1.0](http://opensource.org/licenses/cpl1.0.php).
 
 The event system is based on [Libsigc++](http://libsigc.sourceforge.net/)
 and is used under the [LGPL](http://www.gnu.org/copyleft/lgpl.html).
+
+The main game code comes from [AidanDelaney/StarshipFontana](https://github.com/AidanDelaney/StarshipFontana) please check the [License](https://github.com/AidanDelaney/StarshipFontana/blob/master/LICENCE) for more information.
