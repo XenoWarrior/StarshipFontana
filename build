@@ -1,0 +1,6 @@
+#!/bin/bash
+echo Building program...
+g++ -c src/*.cpp -std=c++11
+g++ -o SFApp *.o -l SDL2 -l SDL2_image
+echo Running program...
+./SFApp

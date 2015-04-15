@@ -6,14 +6,16 @@ SFApp::SFApp(std::shared_ptr<SFWindow> window) : fire(0), is_running(true), sf_w
 
   app_box = make_shared<SFBoundingBox>(Vector2(canvas_w, canvas_h), canvas_w, canvas_h);
   player  = make_shared<SFAsset>(SFASSET_PLAYER, sf_window);
-  auto player_pos = Point2(canvas_w, 88.0f);
+
+  // Set the player position to the width of the canvas / 2 
+  auto player_pos = Point2(canvas_w / 2.0f, 88.0f);
   player->SetPosition(player_pos);
 
-  const int number_of_aliens = 10;
+  const int number_of_aliens = 4;
   for(int i=0; i<number_of_aliens; i++) {
     // place an alien at width/number_of_aliens * i
     auto alien = make_shared<SFAsset>(SFASSET_ALIEN, sf_window);
-    auto pos   = Point2((canvas_w/number_of_aliens) * i, 200.0f);
+    auto pos   = Point2((canvas_w/number_of_aliens) * i + 48.0f, 300.0f);
     alien->SetPosition(pos);
     aliens.push_back(alien);
   }
@@ -72,13 +74,29 @@ int SFApp::OnExecute() {
 }
 
 void SFApp::OnUpdateWorld() {
+  int w, h;
+  SDL_GetRendererOutputSize(sf_window->getRenderer(), &w, &h);
+
   // Update projectile positions
   for(auto p: projectiles) {
     p->GoNorth();
+
+    // Remove projectile when it hits the top of the screen
+    auto p_pos = p->GetPosition();
+
+    if(p_pos.getY() > h) {
+      p->HandleCollision();
+    }
   }
 
-  for(auto c: coins) {
-    c->GoSouth();
+  for(auto c : coins) {
+    c->GoNorth();
+
+    // Check player collision with coin
+    if(player->CollidesWith(c)) {
+      c->HandleCollision();
+      cout << "Collected coin!" << endl;
+    }
   }
 
   // Update enemy positions
@@ -90,6 +108,7 @@ void SFApp::OnUpdateWorld() {
   for(auto p : projectiles) {
     for(auto a : aliens) {
       if(p->CollidesWith(a)) {
+        cout << "Killed an enemy!" << endl;
         p->HandleCollision();
         a->HandleCollision();
       }

@@ -95,7 +95,7 @@ void SFAsset::OnRender() {
 
 void SFAsset::GoWest() {
   Vector2 c = *(bbox->centre) + Vector2(-5.0f, 0.0f);
-  if(!(c.getX() < 0)) {
+  if(!(c.getX()-32.0f < 0)) {
     bbox->centre.reset();
     bbox->centre = make_shared<Vector2>(c);
   }
@@ -106,22 +106,31 @@ void SFAsset::GoEast() {
   SDL_GetRendererOutputSize(sf_window->getRenderer(), &w, &h);
 
   Vector2 c = *(bbox->centre) + Vector2(5.0f, 0.0f);
-  if(!(c.getX() > w)) {
+  if(!(c.getX()+32.0f > w)) {
     bbox->centre.reset();
     bbox->centre = make_shared<Vector2>(c);
   }
 }
 
 void SFAsset::GoNorth() {
-  Vector2 c = *(bbox->centre) + Vector2(0.0f, 1.0f);
-  bbox->centre.reset();
-  bbox->centre = make_shared<Vector2>(c);
+  int w, h;
+  SDL_GetRendererOutputSize(sf_window->getRenderer(), &w, &h);
+
+  Vector2 c = *(bbox->centre) + Vector2(0.0f, 4.0f);
+
+  if(!(c.getY()-18.0f > h)) {
+    bbox->centre.reset();
+    bbox->centre = make_shared<Vector2>(c);
+  }
 }
 
 void SFAsset::GoSouth() {
-  Vector2 c = *(bbox->centre) + Vector2(0.0f, -1.0f);
-  bbox->centre.reset();
-  bbox->centre = make_shared<Vector2>(c);
+  Vector2 c = *(bbox->centre) + Vector2(0.0f, -3.0f);
+
+  if(!(c.getY() < 64.0f)) {
+    bbox->centre.reset();
+    bbox->centre = make_shared<Vector2>(c);
+  }
 }
 
 bool SFAsset::CollidesWith(shared_ptr<SFAsset> other) {
@@ -141,7 +150,7 @@ bool SFAsset::IsAlive() {
 }
 
 void SFAsset::HandleCollision() {
-  if(SFASSET_PROJECTILE == type || SFASSET_ALIEN == type) {
+  if(SFASSET_PROJECTILE == type || SFASSET_ALIEN == type || SFASSET_COIN == type) {
     SetNotAlive();
   }
 }

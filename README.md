@@ -59,6 +59,7 @@ From the top-level directory, the game will expect to find the
 
 ## Issues ##
 * SDL1 to SDL2 port introduced bounding box collision issues.
+* Coin does not collect properly.
 
 ## Credits ##
 The sprites in this game come directly from 
