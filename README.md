@@ -68,4 +68,4 @@ under the terms of the [CPL 1.0](http://opensource.org/licenses/cpl1.0.php).
 The event system is based on [Libsigc++](http://libsigc.sourceforge.net/)
 and is used under the [LGPL](http://www.gnu.org/copyleft/lgpl.html).
 
-The main game code comes from [AidanDelaney/StarshipFontana](https://github.com/AidanDelaney/StarshipFontana) please check the [License](https://github.com/AidanDelaney/StarshipFontana/blob/master/LICENCE) for more information.
+The main game code comes from [AidanDelaney/StarshipFontana](https://github.com/AidanDelaney/StarshipFontana) please check the [LICENCE](https://github.com/AidanDelaney/StarshipFontana/blob/master/LICENCE) for more information.
