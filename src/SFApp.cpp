@@ -90,12 +90,10 @@ void SFApp::OnUpdateWorld() {
   }
 
   for(auto c : coins) {
-    c->GoNorth();
-
     // Check player collision with coin
     if(player->CollidesWith(c)) {
-      c->HandleCollision();
       cout << "Collected coin!" << endl;
+			c->HandleCollision();
     }
   }
 

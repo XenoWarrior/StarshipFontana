@@ -150,7 +150,13 @@ bool SFAsset::IsAlive() {
 }
 
 void SFAsset::HandleCollision() {
-  if(SFASSET_PROJECTILE == type || SFASSET_ALIEN == type || SFASSET_COIN == type) {
+  if(SFASSET_PROJECTILE == type || SFASSET_ALIEN == type) {
     SetNotAlive();
   }
+	if(SFASSET_COIN == type) {
+			int canvas_w, canvas_h;
+			SDL_GetRendererOutputSize(sf_window->getRenderer(), &canvas_w, &canvas_h);
+			auto pos = Point2(rand() % (615-16+1)+16, rand() % (455-16+1)+16);
+      this->SetPosition(pos);
+	}
 }
