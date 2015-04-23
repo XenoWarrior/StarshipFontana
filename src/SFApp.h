@@ -28,16 +28,18 @@ public:
 
   void    FireProjectile();
 private:
-  SDL_Surface           * surface;
+  SDL_Surface             * surface;
   bool                    is_running;
 
-  shared_ptr<SFWindow>       sf_window;
+  shared_ptr<SFWindow>        sf_window;
 
-  shared_ptr<SFAsset>        player;
-  shared_ptr<SFBoundingBox>  app_box;
-  list<shared_ptr<SFAsset> > projectiles;
-  list<shared_ptr<SFAsset> > aliens;
-  list<shared_ptr<SFAsset> > coins;
+  shared_ptr<SFAsset>         player;
+  shared_ptr<SFBoundingBox>   app_box;
+
+  list<shared_ptr<SFAsset>> projectiles;
+  list<shared_ptr<SFAsset>> aliens;
+  list<shared_ptr<SFAsset>> coins;
+  list<shared_ptr<SFAsset>> walls;
 
   int fire;
   int maxProjectiles = 5;

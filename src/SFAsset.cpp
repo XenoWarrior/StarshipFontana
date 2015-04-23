@@ -19,7 +19,7 @@ SFAsset::SFAsset(SFASSETTYPE type, std::shared_ptr<SFWindow> window): type(type)
       sprite = IMG_LoadTexture(sf_window->getRenderer(), "assets/coin.png");
       break;
     case SFASSET_WALL: 
-      sprite = IMG_LoadTexture(sf_window->getRenderer(), "assets/projectile.png");
+      sprite = IMG_LoadTexture(sf_window->getRenderer(), "assets/wall.png");
       break;
   }
 
@@ -115,13 +115,24 @@ void SFAsset::GoEast() {
 
   // Handle movement for type player
   if(SFASSET_PLAYER == type) {
-
 		Vector2 c = *(bbox->centre) + Vector2(5.0f, 0.0f);
 		if(!(c.getX()+32.0f > w)) {
 		  bbox->centre.reset();
 		  bbox->centre = make_shared<Vector2>(c);
 		}
 	}
+
+  if(SFASSET_WALL == type) {
+    Vector2 c = *(bbox->centre) + Vector2(5.0f, 0.0f);
+    if(!(c.getX()-32.0f > w)) {
+      bbox->centre.reset();
+      bbox->centre = make_shared<Vector2>(c);
+    }
+    else {
+      auto pos  = Point2(rand() % -1000 + -400, rand() % 100 + 400);
+      this->SetPosition(pos);
+    }
+  }
 }
 
 // Handling global movement NORTH (UP)
@@ -198,7 +209,7 @@ void SFAsset::GoSouth() {
 void SFAsset::HandleInput(){
   int w, h;
   SDL_GetRendererOutputSize(sf_window->getRenderer(), &w, &h);
-  
+
   /*
     This section of the code handles keyboard input
     Mostly used for player movement and projectile firing
@@ -276,19 +287,19 @@ void SFAsset::HandleCollision() {
   }
   // Collisions for aliens
 	if(SFASSET_ALIEN == type){
-			int canvas_w, canvas_h;
-			SDL_GetRendererOutputSize(sf_window->getRenderer(), &canvas_w, &canvas_h);
+		int canvas_w, canvas_h;
+		SDL_GetRendererOutputSize(sf_window->getRenderer(), &canvas_w, &canvas_h);
 
-    	auto pos  = Point2(rand() % 600 + 32, rand() % 400 + 600);
-      this->SetPosition(pos);
+  	auto pos  = Point2(rand() % 600 + 32, rand() % 400 + 600);
+    this->SetPosition(pos);
 	}	
 
 	// Collisions for coins
 	if(SFASSET_COIN == type) {
-			int canvas_w, canvas_h;
-			SDL_GetRendererOutputSize(sf_window->getRenderer(), &canvas_w, &canvas_h);
+		int canvas_w, canvas_h;
+		SDL_GetRendererOutputSize(sf_window->getRenderer(), &canvas_w, &canvas_h);
 
-    	auto pos  = Point2(rand() % 600 + 32, rand() % 400 + 600);
-      this->SetPosition(pos);
+  	auto pos  = Point2(rand() % 600 + 32, rand() % 400 + 600);
+    this->SetPosition(pos);
 	}
 }
