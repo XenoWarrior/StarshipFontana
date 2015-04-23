@@ -15,7 +15,7 @@ SDL_Renderer * g_renderer;
 enum userEvents{UPDATE_EVENT};
 
 Uint32 PushUpdateEvent(Uint32 interval, void *param) {
-  SDL_Event event;
+	SDL_Event event;
   event.type       = SDL_USEREVENT;
   event.user.code  = UPDATE_EVENT;
   event.user.data1 = 0;
@@ -55,7 +55,8 @@ SFError InitGraphics() {
     throw SF_ERROR_VIDEOMODE;
   }
 
-  SDL_SetRenderDrawColor(g_renderer, 0, 67, 171, 255);
+  //SDL_SetRenderDrawColor(g_renderer, 0, 67, 171, 255);
+	SDL_SetRenderDrawColor(g_renderer, 000, 000, 000, 255);
 
   return SF_ERROR_NONE;
 }

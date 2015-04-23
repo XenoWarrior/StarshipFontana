@@ -62,25 +62,26 @@ Vector2 GameSpaceToScreenSpace(SDL_Renderer* renderer, Vector2 &r) {
   int w, h;
   SDL_GetRendererOutputSize(renderer, &w, &h);
 
-  return Vector2 (
-                  r.getX(),
-                  (h - r.getY())
-                  );
+  return Vector2 (r.getX(), (h - r.getY()));
 }
 
+// Setting object position
 void SFAsset::SetPosition(Point2 & point) {
   Vector2 v(point.getX(), point.getY());
   bbox->SetCentre(v);
 }
 
+// Getting object position
 Point2 SFAsset::GetPosition() {
   return Point2(bbox->centre->getX(), bbox->centre->getY());
 }
 
+// Getting object ID
 SFAssetId SFAsset::GetId() {
   return id;
 }
 
+// Rendering object
 void SFAsset::OnRender() {
   // 1. Get the SDL_Rect from SFBoundingBox
   SDL_Rect rect;
@@ -96,78 +97,121 @@ void SFAsset::OnRender() {
   SDL_RenderCopy(sf_window->getRenderer(), sprite, NULL, &rect);
 }
 
+// Player movement handling
 void SFAsset::GoWest() {
-  Vector2 c = *(bbox->centre) + Vector2(-5.0f, 0.0f);
-  if(!(c.getX()-32.0f < 0)) {
-    bbox->centre.reset();
-    bbox->centre = make_shared<Vector2>(c);
-  }
+	if(SFASSET_PLAYER == type) {
+	  Vector2 c = *(bbox->centre) + Vector2(-5.0f, 0.0f);
+	  if(!(c.getX()-32.0f < 0)) {
+	    bbox->centre.reset();
+	    bbox->centre = make_shared<Vector2>(c);
+	  }
+	}
 }
-
 void SFAsset::GoEast() {
-  int w, h;
-  SDL_GetRendererOutputSize(sf_window->getRenderer(), &w, &h);
+	if(SFASSET_PLAYER == type) {
+		int w, h;
+		SDL_GetRendererOutputSize(sf_window->getRenderer(), &w, &h);
 
-  Vector2 c = *(bbox->centre) + Vector2(5.0f, 0.0f);
-  if(!(c.getX()+32.0f > w)) {
-    bbox->centre.reset();
-    bbox->centre = make_shared<Vector2>(c);
-  }
+		Vector2 c = *(bbox->centre) + Vector2(5.0f, 0.0f);
+		if(!(c.getX()+32.0f > w)) {
+		  bbox->centre.reset();
+		  bbox->centre = make_shared<Vector2>(c);
+		}
+	}
 }
-
 void SFAsset::GoNorth() {
-  int w, h;
-  SDL_GetRendererOutputSize(sf_window->getRenderer(), &w, &h);
+	if(SFASSET_PLAYER == type) {
+		int w, h;
+		SDL_GetRendererOutputSize(sf_window->getRenderer(), &w, &h);
 
-  Vector2 c = *(bbox->centre) + Vector2(0.0f, 4.0f);
+		Vector2 c = *(bbox->centre) + Vector2(0.0f, 4.0f);
 
-  if(!(c.getY()-18.0f > h)) {
+		if(!(c.getY()-18.0f > h)) {
+		  bbox->centre.reset();
+		  bbox->centre = make_shared<Vector2>(c);
+		}
+	}
+	if(SFASSET_PROJECTILE == type){
+	  Vector2 c = *(bbox->centre) + Vector2(0.0f, 10.0f);
     bbox->centre.reset();
     bbox->centre = make_shared<Vector2>(c);
-  }
+	}
 }
-
 void SFAsset::GoSouth() {
-  Vector2 c = *(bbox->centre) + Vector2(0.0f, -3.0f);
+	if(SFASSET_PLAYER == type) {
+		Vector2 c = *(bbox->centre) + Vector2(0.0f, -3.0f);
 
-  if(!(c.getY() < 64.0f)) {
-    bbox->centre.reset();
-    bbox->centre = make_shared<Vector2>(c);
-  }
+		if(!(c.getY() < 64.0f)) {
+		  bbox->centre.reset();
+		  bbox->centre = make_shared<Vector2>(c);
+		}
+	}
+	if(SFASSET_COIN == type) {
+		Vector2 c = *(bbox->centre) + Vector2(0.0f, -1.0f);
+
+		if(!(c.getY() < 0.0f)) {
+			bbox->centre.reset();
+			bbox->centre = make_shared<Vector2>(c);
+		}
+		else{
+    	auto pos  = Point2(rand() % 600 + 32, rand() % 400 + 600);
+      this->SetPosition(pos);
+		}
+	}
+	if(SFASSET_ALIEN == type) {
+		Vector2 c = *(bbox->centre) + Vector2(0.0f, -2.0f);
+
+		if(!(c.getY() < 0.0f)) {
+			bbox->centre.reset();
+			bbox->centre = make_shared<Vector2>(c);
+		}
+		else{
+    	auto pos  = Point2(rand() % 600 + 32, rand() % 400 + 600);
+      this->SetPosition(pos);
+		}
+	}
 }
 
+// Collision detection
 bool SFAsset::CollidesWith(shared_ptr<SFAsset> other) {
   return bbox->CollidesWith(other->bbox);
 }
 
+// Get bounding box of instance
 shared_ptr<SFBoundingBox> SFAsset::GetBoundingBox() {
   return bbox;
 }
 
+
+// Setting and getting object status
 void SFAsset::SetNotAlive() {
   type = SFASSET_DEAD;
 }
-
 bool SFAsset::IsAlive() {
   return (SFASSET_DEAD != type);
 }
 
-bool SFAsset::GetDirection(){
-  return SFASSET_DIRECTION;
-}
-
-void SFAsset::SetDirection(){
-  // TODO: FINISH THIS
-}
-
+// Handing object collisions
 void SFAsset::HandleCollision() {
-  if(SFASSET_PROJECTILE == type || SFASSET_ALIEN == type) {
+	// Collisions for projectiles and aliens
+  if(SFASSET_PROJECTILE == type) {
     SetNotAlive();
   }
+
+	if(SFASSET_ALIEN == type){
+			int canvas_w, canvas_h;
+			SDL_GetRendererOutputSize(sf_window->getRenderer(), &canvas_w, &canvas_h);
+
+    	auto pos  = Point2(rand() % 600 + 32, rand() % 400 + 600);
+      this->SetPosition(pos);
+	}	
+
+	// Collisions for coins
 	if(SFASSET_COIN == type) {
 			int canvas_w, canvas_h;
 			SDL_GetRendererOutputSize(sf_window->getRenderer(), &canvas_w, &canvas_h);
-			auto pos = Point2(rand() % 600 + 32, rand() % 200 + 200);
+
+    	auto pos  = Point2(rand() % 600 + 32, rand() % 400 + 600);
       this->SetPosition(pos);
 	}
 }

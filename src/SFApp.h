@@ -38,9 +38,9 @@ private:
   list<shared_ptr<SFAsset> > projectiles;
   list<shared_ptr<SFAsset> > aliens;
   list<shared_ptr<SFAsset> > coins;
-  list<shared_ptr<SFAsset> > walls;
 
   int fire;
+  int maxProjectiles = 5;
 
   SFError OnInit();
 };

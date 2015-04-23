@@ -34,15 +34,14 @@ public:
   virtual SFAssetId GetId();
   virtual void      OnRender();
   virtual void      GoEast();
-  virtual void      GoWest();
+  virtual void      GoWest(); 
   virtual void      GoNorth();
   virtual void      GoSouth();
   virtual void      SetNotAlive();
   virtual bool      IsAlive();
   virtual void      HandleCollision();
-  virtual bool      GetDirection();
 
-  virtual bool                      CollidesWith(shared_ptr<SFAsset>);
+  virtual bool      CollidesWith(shared_ptr<SFAsset>);;
   virtual shared_ptr<SFBoundingBox> GetBoundingBox();
 private:
   // it would be nice if we could make this into a smart pointer,
@@ -53,7 +52,6 @@ private:
   shared_ptr<SFBoundingBox>   bbox;
   SFASSETTYPE                 type;
   SFAssetId                   id;
-  SFASSET_DIRECTION           currDirection;
   std::shared_ptr<SFWindow>   sf_window;
 
   static int SFASSETID;
