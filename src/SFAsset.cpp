@@ -6,18 +6,21 @@ SFAsset::SFAsset(SFASSETTYPE type, std::shared_ptr<SFWindow> window): type(type)
   this->id   = ++SFASSETID;
 
   switch (type) {
-  case SFASSET_PLAYER:
-    sprite = IMG_LoadTexture(sf_window->getRenderer(), "assets/player.png");
-    break;
-  case SFASSET_PROJECTILE:
-    sprite = IMG_LoadTexture(sf_window->getRenderer(), "assets/projectile.png");
-    break;
-  case SFASSET_ALIEN:
-    sprite = IMG_LoadTexture(sf_window->getRenderer(), "assets/alien.png");
-    break;
-  case SFASSET_COIN:
-    sprite = IMG_LoadTexture(sf_window->getRenderer(), "assets/coin.png");
-    break;
+    case SFASSET_PLAYER:
+      sprite = IMG_LoadTexture(sf_window->getRenderer(), "assets/player.png");
+      break;
+    case SFASSET_PROJECTILE:
+      sprite = IMG_LoadTexture(sf_window->getRenderer(), "assets/projectile.png");
+      break;
+    case SFASSET_ALIEN:
+      sprite = IMG_LoadTexture(sf_window->getRenderer(), "assets/alien.png");
+      break;
+    case SFASSET_COIN:
+      sprite = IMG_LoadTexture(sf_window->getRenderer(), "assets/coin.png");
+      break;
+    case SFASSET_WALL: 
+      sprite = IMG_LoadTexture(sf_window->getRenderer(), "assets/projectile.png");
+      break;
   }
 
   if(!sprite) {
@@ -149,6 +152,14 @@ bool SFAsset::IsAlive() {
   return (SFASSET_DEAD != type);
 }
 
+bool SFAsset::GetDirection(){
+  return SFASSET_DIRECTION;
+}
+
+void SFAsset::SetDirection(){
+  // TODO: FINISH THIS
+}
+
 void SFAsset::HandleCollision() {
   if(SFASSET_PROJECTILE == type || SFASSET_ALIEN == type) {
     SetNotAlive();
@@ -156,7 +167,7 @@ void SFAsset::HandleCollision() {
 	if(SFASSET_COIN == type) {
 			int canvas_w, canvas_h;
 			SDL_GetRendererOutputSize(sf_window->getRenderer(), &canvas_w, &canvas_h);
-			auto pos = Point2(rand() % (615-16+1)+16, rand() % (455-16+1)+16);
+			auto pos = Point2(rand() % 600 + 32, rand() % 200 + 200);
       this->SetPosition(pos);
 	}
 }
