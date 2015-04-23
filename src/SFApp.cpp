@@ -38,16 +38,26 @@ SFApp::~SFApp() {
  */
 void SFApp::OnEvent(SFEvent& event) {
   SFEVENT the_event = event.GetCode();
-  switch (the_event) {
-    case SFEVENT_QUIT:
-      is_running = false;
-      break;
-    case SFEVENT_UPDATE:
-      OnUpdateWorld();
-      OnRender();
-      break;
-    default:
-      break;
+  // Update event
+  if(the_event == SFEVENT_UPDATE) {
+    OnUpdateWorld();
+    OnRender();
+  }
+  // Quit event
+  if(the_event == SFEVENT_QUIT) {
+    is_running = false;
+    if(currTick > 0){
+      cout << endl << "Time Played: " << ((currTick / 60) / 60) << " minute(s) | " << (currTick / 60) << " second(s)" << endl;
+    }
+    cout << "Enemies Killed: " << enemiesKilled << " | Coins Collected: " << coinsCollected <<  " | Projectiles Fired: " << totalProjectiles << endl << endl;
+  }
+  // Fire event
+  if(the_event == SFEVENT_FIRE){
+    if(fire < maxProjectiles){
+      totalProjectiles++;
+      fire++;
+      FireProjectile();
+    }
   }
 }
 
@@ -66,37 +76,7 @@ void SFApp::OnUpdateWorld() {
   int w, h;
   SDL_GetRendererOutputSize(sf_window->getRenderer(), &w, &h);
 
-
-  // Fetch mouse X and Y position.
-  int x,y;
-  if(SDL_GetMouseState(&x, &y)){
-    // Check if mouse state returned 1 (left-click)
-    fire ++;
-    if(fire < maxProjectiles)
-      FireProjectile();
-
-    // X/Y debug:
-    cout << "MX: " << x << " MY: " << y << endl;
-  }
-
-  // This is how I check for more than one keyboard event to make the movement smooth.
-  const Uint8 *keyboardState = SDL_GetKeyboardState(NULL);
-  if(keyboardState[SDL_SCANCODE_DOWN]) {
-    player->GoSouth();
-  }
-  if(keyboardState[SDL_SCANCODE_UP]) {
-    player->GoNorth();
-  }
-  if(keyboardState[SDL_SCANCODE_LEFT]) {
-    player->GoWest();
-  }
-  if(keyboardState[SDL_SCANCODE_RIGHT]) {
-    player->GoEast();
-  }
-  if(keyboardState[SDL_SCANCODE_SPACE]) {
-    fire ++;
-    FireProjectile();
-  }
+  player->HandleInput();
 
   // Update projectile positions
   for(auto p: projectiles) {
@@ -115,7 +95,10 @@ void SFApp::OnUpdateWorld() {
     // Check player collision with coin
     if(player->CollidesWith(c)) {
       cout << "Collected coin!" << endl;
-			c->HandleCollision();
+      
+      c->HandleCollision();
+      
+      coinsCollected++;
     }
   }
 
@@ -129,8 +112,11 @@ void SFApp::OnUpdateWorld() {
     for(auto a : aliens) {
       if(p->CollidesWith(a)) {
         cout << "Killed an enemy!" << endl;
+        
         p->HandleCollision();
         a->HandleCollision();
+        
+        enemiesKilled++;
       }
     }
   }
@@ -151,9 +137,14 @@ void SFApp::OnUpdateWorld() {
     if(p->IsAlive()) {
       projTemp.push_back(p);
     }
+    else{
+      fire--;
+    }
   }
   projectiles.clear();
   projectiles = list<shared_ptr<SFAsset>>(projTemp);
+
+  currTick++;
 }
 
 void SFApp::OnRender() {
@@ -162,17 +153,23 @@ void SFApp::OnRender() {
   // Draw the player
   player->OnRender();
 
+  // Render projectiles that are currently alive
   for(auto p: projectiles) {
-    if(p->IsAlive()) {p->OnRender();}
+    if(p->IsAlive()) {
+      p->OnRender();
+    }
   }
 
+  // Render aliens that are currently alive
   for(auto a: aliens) {
-    if(a->IsAlive()) {a->OnRender();}
+    if(a->IsAlive()) {
+      a->OnRender();
+    }
   }
 
+  // Render coins that are currently alive
   for(auto c: coins) {
     c->OnRender();
-    c->GoSouth();
   }
 
   // Switch the off-screen buffer to be on-screen

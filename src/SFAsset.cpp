@@ -97,7 +97,7 @@ void SFAsset::OnRender() {
   SDL_RenderCopy(sf_window->getRenderer(), sprite, NULL, &rect);
 }
 
-// Player movement handling
+// Handling global movement WEST (LEFT)
 void SFAsset::GoWest() {
 	if(SFASSET_PLAYER == type) {
 	  Vector2 c = *(bbox->centre) + Vector2(-5.0f, 0.0f);
@@ -107,10 +107,14 @@ void SFAsset::GoWest() {
 	  }
 	}
 }
+
+// Handling global movement EAST (RIGHT)
 void SFAsset::GoEast() {
-	if(SFASSET_PLAYER == type) {
-		int w, h;
-		SDL_GetRendererOutputSize(sf_window->getRenderer(), &w, &h);
+	int w, h;
+	SDL_GetRendererOutputSize(sf_window->getRenderer(), &w, &h);
+
+  // Handle movement for type player
+  if(SFASSET_PLAYER == type) {
 
 		Vector2 c = *(bbox->centre) + Vector2(5.0f, 0.0f);
 		if(!(c.getX()+32.0f > w)) {
@@ -119,10 +123,14 @@ void SFAsset::GoEast() {
 		}
 	}
 }
+
+// Handling global movement NORTH (UP)
 void SFAsset::GoNorth() {
-	if(SFASSET_PLAYER == type) {
-		int w, h;
-		SDL_GetRendererOutputSize(sf_window->getRenderer(), &w, &h);
+	int w, h;
+	SDL_GetRendererOutputSize(sf_window->getRenderer(), &w, &h);
+
+  // Handle movement for type player
+  if(SFASSET_PLAYER == type) {
 
 		Vector2 c = *(bbox->centre) + Vector2(0.0f, 4.0f);
 
@@ -131,13 +139,23 @@ void SFAsset::GoNorth() {
 		  bbox->centre = make_shared<Vector2>(c);
 		}
 	}
+
+  // Handle movement for type projectile
 	if(SFASSET_PROJECTILE == type){
 	  Vector2 c = *(bbox->centre) + Vector2(0.0f, 10.0f);
-    bbox->centre.reset();
-    bbox->centre = make_shared<Vector2>(c);
+    if(!(c.getY()-18.0f > h)) {
+      bbox->centre.reset();
+      bbox->centre = make_shared<Vector2>(c);
+    }
+    else {
+      this->SetNotAlive();
+    }
 	}
 }
+
+// Handling global movement SOUTH (DOWN)
 void SFAsset::GoSouth() {
+  // Handle movement for type player
 	if(SFASSET_PLAYER == type) {
 		Vector2 c = *(bbox->centre) + Vector2(0.0f, -3.0f);
 
@@ -146,6 +164,8 @@ void SFAsset::GoSouth() {
 		  bbox->centre = make_shared<Vector2>(c);
 		}
 	}
+
+  // Handle movement for type coin
 	if(SFASSET_COIN == type) {
 		Vector2 c = *(bbox->centre) + Vector2(0.0f, -1.0f);
 
@@ -158,6 +178,8 @@ void SFAsset::GoSouth() {
       this->SetPosition(pos);
 		}
 	}
+
+  // Handle movement for type alien
 	if(SFASSET_ALIEN == type) {
 		Vector2 c = *(bbox->centre) + Vector2(0.0f, -2.0f);
 
@@ -172,6 +194,61 @@ void SFAsset::GoSouth() {
 	}
 }
 
+// Handle player input
+void SFAsset::HandleInput(){
+  int w, h;
+  SDL_GetRendererOutputSize(sf_window->getRenderer(), &w, &h);
+  
+  /*
+    This section of the code handles keyboard input
+    Mostly used for player movement and projectile firing
+  */
+  const Uint8 *keyboardState = SDL_GetKeyboardState(NULL);
+  if(keyboardState[SDL_SCANCODE_DOWN]) {
+    this->GoSouth();
+  }
+  if(keyboardState[SDL_SCANCODE_UP]) {
+    this->GoNorth();
+  }
+  if(keyboardState[SDL_SCANCODE_LEFT]) {
+    this->GoWest();
+  }
+  if(keyboardState[SDL_SCANCODE_RIGHT]) {
+    this->GoEast();
+  }
+
+  /*
+    This section of the code handles mouse input
+    Mostly used to move player (optional and very WIP)
+  */
+  int mouseX, mouseY;
+  SDL_GetMouseState(&mouseX, &mouseY);
+
+  // Check for left pressed
+  if(SDL_GetMouseState(NULL, NULL) == 1){
+    //Now possible to move player towards mouse -- WORK IN PROGRESS
+    auto pPos = this->GetPosition();
+    int mouseYFix = (w - mouseY);
+    if(pPos.getX() > mouseX){
+      this->GoWest();
+    }
+    if(pPos.getX() < mouseX){
+      this->GoEast();
+    }
+    if(pPos.getY() > mouseYFix){
+      this->GoSouth();
+    }
+    if(pPos.getY() < mouseYFix){
+      this->GoNorth();
+    }
+    cout << "M: " << mouseX << "x" << mouseYFix << " | P: " << pPos.getX() << "x" << pPos.getY() << endl;
+  }
+  // Check for right pressed
+  if(SDL_GetMouseState(NULL, NULL) == 4) {
+    cout << "Right mouse pressed!" << endl;
+  }
+}
+
 // Collision detection
 bool SFAsset::CollidesWith(shared_ptr<SFAsset> other) {
   return bbox->CollidesWith(other->bbox);
@@ -182,22 +259,22 @@ shared_ptr<SFBoundingBox> SFAsset::GetBoundingBox() {
   return bbox;
 }
 
-
 // Setting and getting object status
 void SFAsset::SetNotAlive() {
   type = SFASSET_DEAD;
 }
+
 bool SFAsset::IsAlive() {
   return (SFASSET_DEAD != type);
 }
 
 // Handing object collisions
 void SFAsset::HandleCollision() {
-	// Collisions for projectiles and aliens
+	// Collisions for projectiles
   if(SFASSET_PROJECTILE == type) {
     SetNotAlive();
   }
-
+  // Collisions for aliens
 	if(SFASSET_ALIEN == type){
 			int canvas_w, canvas_h;
 			SDL_GetRendererOutputSize(sf_window->getRenderer(), &canvas_w, &canvas_h);

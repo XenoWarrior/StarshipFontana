@@ -41,6 +41,12 @@ private:
 
   int fire;
   int maxProjectiles = 5;
+  int totalProjectiles = 0;
+
+  int currTick = 0;
+
+  int enemiesKilled = 0;
+  int coinsCollected = 0;
 
   SFError OnInit();
 };
