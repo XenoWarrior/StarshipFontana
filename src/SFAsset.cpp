@@ -376,6 +376,13 @@ bool SFAsset::IsAlive() {
   return (SFASSET_DEAD != type);
 }
 
+// Specific collision handling for enemy to player
+void SFAsset::HandlePlayerCollision(){
+  if(SFASSET_ALIEN == type){
+    this->SetNotAlive();
+  }
+}
+
 // Handing object collisions
 int SFAsset::HandleCollision() {
 	// Collisions for projectiles
@@ -393,8 +400,17 @@ int SFAsset::HandleCollision() {
       // Hurt the enemy for 5 HP
       this->SetHealth(this->GetHealth() - 5);
 
+      // Get HP as string
+      int tempHP = this->GetHealth();
+
+      // Convert the HP to string form
+      string HPTempString;
+      ostringstream HPConvert;
+      HPConvert << tempHP;
+      HPTempString = HPConvert.str();
+
       // Tell player it was hurt
-      cout << "Hurt enemy " << this->GetId() << " for 5HP. (Left: " << this->GetHealth() << ")" << endl;
+      cout << "Hurt enemy " << this->GetId() << " for 5HP. (EnemyHP: " << (this->GetHealth() <= 0 ? "DEAD" : HPTempString) << ")" << endl;
 
       // Do another check because we can reach 0, but it won't check until next collision.
       if(this->GetHealth() <= 0){
@@ -402,9 +418,6 @@ int SFAsset::HandleCollision() {
         auto pos  = Point2(rand() % 600 + 32, rand() % 400 + 600);
         this->SetPosition(pos);
         this->SetHealth(10);
-
-        // Tell player
-        cout << "Enemy " << this->GetId() << " died!" << endl;
 
         // Return special condition back to call
         return 1;

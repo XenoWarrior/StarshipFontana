@@ -190,21 +190,23 @@ void SFApp::OnUpdateWorld() {
   // Update enemy positions and check player collisions
   for(auto a : aliens) {
     // Move the enemy south
-		a->GoSouth();
+    a->GoSouth();
 
     // Check if player collides with enemy
     if(player->CollidesWith(a)) {
       // Remove 10 health
       player->SetHealth(player->GetHealth() - 10);
       
-      // If HandleCollision returns a special value (1) to show enemy run out of HP
-      if(a->HandleCollision() == 1){
-        // Add to our counter for 
-        enemiesKilled++;
+      // Special collisions detection for player colliding with enemies (instant kill enemy + removed 10HP from player)
+      if(a->IsAlive()){
+        a->HandlePlayerCollision();
       }
 
+      // Add one to enemy kill counter
+      enemiesKilled++;
+
       // Output left over health after collision
-      cout << "Crashed with an enemy, dealing 10 damage. (Left" << player->GetHealth() << ")" << endl;
+      cout << "Crashed with an enemy" << a->GetId() << "! Taking 10 damage. (PlayerHP: " << player->GetHealth() << ")" << endl;
     }
   }
 

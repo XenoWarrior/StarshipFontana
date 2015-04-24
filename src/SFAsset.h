@@ -4,6 +4,7 @@
 #include <string>
 #include <memory>
 #include <iostream>
+#include <sstream>
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
@@ -40,6 +41,7 @@ public:
   virtual void      SetNotAlive();
   virtual bool      IsAlive();
   virtual int       HandleCollision();
+  virtual void      HandlePlayerCollision();
   virtual void      HandleInput();
   virtual int       GetHealth();
   virtual void      SetHealth(int val);
