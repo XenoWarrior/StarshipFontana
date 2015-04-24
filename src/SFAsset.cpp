@@ -316,11 +316,9 @@ void SFAsset::HandleInput(){
   if(keyboardState[SDL_SCANCODE_RIGHT]) {
     this->GoEast();
   }
-
-  /*
-    This section of the code handles mouse input
-    Mostly used to move player (optional and very WIP)
-  */
+  
+  // This section of the code handles mouse input
+  // Mostly used to move player (optional and very WIP)
   int mouseX, mouseY;
   SDL_GetMouseState(&mouseX, &mouseY);
 
@@ -346,9 +344,6 @@ void SFAsset::HandleInput(){
     if(pPos.getY() < mouseYFix){
       this->GoNorth();
     }
-    
-    // Some loud/spammy debug. ;)
-    //cout << "M: " << mouseX << "x" << mouseYFix << " | P: " << pPos.getX() << "x" << pPos.getY() << endl;
   }
 
   // Check for right pressed
