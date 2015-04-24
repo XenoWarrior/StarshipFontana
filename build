@@ -1,6 +1,8 @@
 #!/bin/bash
 clear
-echo Building program...
+echo Removing old build...
+rm SFApp
+echo Building program... Any compile errors will show here.
 g++ -c src/*.cpp -std=c++11
 g++ -o SFApp *.o -l SDL2 -l SDL2_image
 echo Running program...
