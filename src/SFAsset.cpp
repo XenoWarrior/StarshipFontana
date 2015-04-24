@@ -168,7 +168,7 @@ void SFAsset::GoNorth() {
 void SFAsset::GoSouth() {
   // Handle movement for type player
 	if(SFASSET_PLAYER == type) {
-		Vector2 c = *(bbox->centre) + Vector2(0.0f, -3.0f);
+		Vector2 c = *(bbox->centre) + Vector2(0.0f, -2.0f);
 
 		if(!(c.getY() < 64.0f)) {
 		  bbox->centre.reset();
