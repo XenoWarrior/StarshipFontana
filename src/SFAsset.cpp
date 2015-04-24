@@ -118,6 +118,20 @@ SFAssetId SFAsset::GetId() {
 }
 
 /*********************************************************
+  Will get the object health points
+*********************************************************/
+int SFAsset::GetHealth() {
+  return objHP;
+}
+
+/*********************************************************
+  Will set the object health points
+*********************************************************/
+void SFAsset::SetHealth(int val) {
+  this->objHP = val;
+}
+
+/*********************************************************
   Display the object on the render window
 *********************************************************/
 void SFAsset::OnRender() {
@@ -267,6 +281,7 @@ void SFAsset::GoSouth() {
 		else{
     	auto pos  = Point2(rand() % 600 + 32, rand() % 400 + 600);
       this->SetPosition(pos);
+      this->SetHealth(10);
 		}
 	}
 }
@@ -362,7 +377,7 @@ bool SFAsset::IsAlive() {
 }
 
 // Handing object collisions
-void SFAsset::HandleCollision() {
+int SFAsset::HandleCollision() {
 	// Collisions for projectiles
   if(SFASSET_PROJECTILE == type) {
     SetNotAlive();
@@ -373,8 +388,40 @@ void SFAsset::HandleCollision() {
     int canvas_w, canvas_h;
     SDL_GetRendererOutputSize(sf_window->getRenderer(), &canvas_w, &canvas_h);
 
-    auto pos  = Point2(rand() % 600 + 32, rand() % 400 + 600);
-    this->SetPosition(pos);
+    // For removing enemy health and checking if it died
+    if(this->GetHealth() > 0){
+      // Hurt the enemy for 5 HP
+      this->SetHealth(this->GetHealth() - 5);
+
+      // Tell player it was hurt
+      cout << "Hurt enemy " << this->GetId() << " for 5HP. (Left: " << this->GetHealth() << ")" << endl;
+
+      // Do another check because we can reach 0, but it won't check until next collision.
+      if(this->GetHealth() <= 0){
+        // Enemy died, so set new position and health
+        auto pos  = Point2(rand() % 600 + 32, rand() % 400 + 600);
+        this->SetPosition(pos);
+        this->SetHealth(10);
+
+        // Tell player
+        cout << "Enemy " << this->GetId() << " died!" << endl;
+
+        // Return special condition back to call
+        return 1;
+      }
+    }
+    else{
+      // Enemy died, so set new position and health
+      auto pos  = Point2(rand() % 600 + 32, rand() % 400 + 600);
+      this->SetPosition(pos);
+      this->SetHealth(10);
+
+      // Tell player
+      cout << "Enemy " << this->GetId() << " died!" << endl;
+
+      // Return special condition back to call
+      return 1;
+    }
   }
 
 	// Collisions for coins
@@ -385,4 +432,5 @@ void SFAsset::HandleCollision() {
   	auto pos  = Point2(rand() % 600 + 32, rand() % 400 + 600);
     this->SetPosition(pos);
 	}
+  return 0;
 }

@@ -31,14 +31,21 @@ SFApp::SFApp(std::shared_ptr<SFWindow> window) : fire(0), is_running(true), sf_w
   // Set the player position to the width of the canvas / 2 
   auto player_pos = Point2(canvas_w / 2.0f, 88.0f);
   player->SetPosition(player_pos);
+  player->SetHealth(100);
 
   const int number_of_aliens = 10;
   for(int i = 0; i < number_of_aliens; i++) {
     // place an alien at width/number_of_aliens * i
     auto alien = make_shared<SFAsset>(SFASSET_ALIEN, sf_window);
     auto pos  = Point2(rand() % 600 + 32, rand() % 400 + 600);
+
+    // Make enemy at position and set it's health
     alien->SetPosition(pos);
+    alien->SetHealth(10);
+
     aliens.push_back(alien);
+
+    cout << "Created enemy with " << alien->GetHealth() << endl;
   }
 
   for(int i = 0; i < 2; i++) {
@@ -47,6 +54,7 @@ SFApp::SFApp(std::shared_ptr<SFWindow> window) : fire(0), is_running(true), sf_w
     coin->SetPosition(pos);
     coins.push_back(coin);
   }
+  cout << endl << "Welcome to the game, you have " << player->GetHealth() << " HP." << endl;
 }
 
 SFApp::~SFApp() {
@@ -74,53 +82,24 @@ void SFApp::OnEvent(SFEvent& event) {
 
   // Now check what event we're processing.
   switch(the_event) {
-
     // This is the update event returned from SFEvent::GetCode();
-    case SFEVENT_UPDATE:
+    case SFEVENT_UPDATE: {
       // Update world and renderer.
       OnUpdateWorld();
       OnRender();
 
       // Break out of switch statement.
       break;
-
+    }
     // This event handles quitting the game.
-    case SFEVENT_QUIT:
-      // Set our game to not running, this will be checked in the SFApp::OnExecute(); (SFApp.cpp) method.
-      // False simple causes it to break out of the while statement in the OnExecute() statement.
+    case SFEVENT_QUIT: {
       is_running = false;
-
-      // This will simply calculete the time that the player has spent playing the game.
-      // To ensure we don't do a a division by 0 (very unlikely).
-      if(currTick > 0){
-        // Setup the minutes/seconds variables.
-        int min = 0, sec = 0;
-
-        // Calculate is we've played for more than a minute so we can calculate minutes.
-        if(currTick > 600){
-          // Division by 60 to seconds then 60 to minutes.
-          min = ((currTick / 60) / 60);
-
-          // Remove the total ticks that we took from the tick counter.
-          currTick -= ((min * 60) * 60);
-        }
-
-        // This will now check if there are more than 60 ticks, possible to calculate seconds.
-        if(currTick > 60){
-          // Just divide the ticks by 60 to get seconds
-          sec = (currTick / 60);
-        }
-        // Output some statistics to console for the player to see.
-        cout << endl << "Time Played: " << min << " minute(s) | " << sec << " second(s)" << endl;
-      }
-      // This will show the player what they did during their session.
-      cout << "Enemies Killed: " << enemiesKilled << " | Coins Collected: " << coinsCollected <<  " | Projectiles Fired: " << totalProjectiles << endl << endl;
-
+      EndGame();
       // Break out of switch statement.
       break;
-
+    }
     // This handles the firing of projectiles, this has been left here so it only checks and delays rapid firing.
-    case SFEVENT_FIRE:
+    case SFEVENT_FIRE: {
       // Check if we can fire (maxProjectiles limits the total on screen allowed)
       if(fire < maxProjectiles){
         // Count how many projectiles were fired in the entire session.
@@ -132,13 +111,10 @@ void SFApp::OnEvent(SFEvent& event) {
         // Fire a projectile.
         FireProjectile();
       }
-
       // Break out of statement.
       break;
-
-    // Not needed, but just here because I do this.
-    default:
-      break;
+    }
+    break;
   }
 }
 
@@ -180,10 +156,17 @@ void SFApp::OnUpdateWorld() {
   // Run the new movement handler for our player
   player->HandleInput();
 
+  if(player->GetHealth() <= 0){
+    cout << endl <<  "Game Over! You have died!" << endl << "Check your statistics below!" << endl;
+    EndGame();
+    is_running = false;
+  }
+
   // Update projectile positions
   for(auto p: projectiles) {
     // Move projectile north
     p->GoNorth();
+
   }
 
   // Update collectible positions and check collisions
@@ -204,10 +187,25 @@ void SFApp::OnUpdateWorld() {
     }
   }
 
-  // Update enemy positions
+  // Update enemy positions and check player collisions
   for(auto a : aliens) {
     // Move the enemy south
 		a->GoSouth();
+
+    // Check if player collides with enemy
+    if(player->CollidesWith(a)) {
+      // Remove 10 health
+      player->SetHealth(player->GetHealth() - 10);
+      
+      // If HandleCollision returns a special value (1) to show enemy run out of HP
+      if(a->HandleCollision() == 1){
+        // Add to our counter for 
+        enemiesKilled++;
+      }
+
+      // Output left over health after collision
+      cout << "Crashed with an enemy, dealing 10 damage. (Left" << player->GetHealth() << ")" << endl;
+    }
   }
 
   // This is a new idea I am implementing, the walls will actually move along screen and hit the player
@@ -223,15 +221,14 @@ void SFApp::OnUpdateWorld() {
     for(auto a : aliens) {
       // If the projectile collides with the alien
       if(p->CollidesWith(a)) {
-        // We output the message to say an enemy was killed
-        cout << "Killed an enemy!" << endl;
-        
         // Handle the collisions for both projectile and enemy
         p->HandleCollision();
-        a->HandleCollision();
         
-        // Add to our counter for 
-        enemiesKilled++;
+        // If HandleCollision returns a special value (1) to show enemy run out of HP
+        if(a->HandleCollision() == 1){
+          // Add to our counter for 
+          enemiesKilled++;
+        }
       }
     }
   }
@@ -347,4 +344,32 @@ void SFApp::FireProjectile() {
 
   // Push back to array
   projectiles.push_back(pb);
+}
+
+void SFApp::EndGame(){
+  // This will simply calculate the time that the player has spent playing the game.
+  // To ensure we don't do a a division by 0 (very unlikely).
+  if(currTick > 0){
+    // Setup the minutes/seconds variables.
+    int min = 0, sec = 0;
+
+    // Calculate is we've played for more than a minute so we can calculate minutes.
+    if(currTick > 600){
+      // Division by 60 to seconds then 60 to minutes.
+      min = ((currTick / 60) / 60);
+
+      // Remove the total ticks that we took from the tick counter.
+      currTick -= ((min * 60) * 60);
+    }
+
+    // This will now check if there are more than 60 ticks, possible to calculate seconds.
+    if(currTick > 60){
+      // Just divide the ticks by 60 to get seconds
+      sec = (currTick / 60);
+    }
+    // Output some statistics to console for the player to see.
+    cout << endl << "Time Played: " << min << " minute(s) | " << sec << " second(s)" << endl;
+  }
+  // This will show the player what they did during their session.
+  cout << "Enemies Killed: " << enemiesKilled << " | Coins Collected: " << coinsCollected <<  " | Projectiles Fired: " << totalProjectiles << endl << endl;
 }

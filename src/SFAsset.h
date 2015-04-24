@@ -39,8 +39,10 @@ public:
   virtual void      GoSouth();
   virtual void      SetNotAlive();
   virtual bool      IsAlive();
-  virtual void      HandleCollision();
+  virtual int       HandleCollision();
   virtual void      HandleInput();
+  virtual int       GetHealth();
+  virtual void      SetHealth(int val);
 
   virtual bool      CollidesWith(shared_ptr<SFAsset>);;
   virtual shared_ptr<SFBoundingBox> GetBoundingBox();
@@ -54,6 +56,9 @@ private:
   SFASSETTYPE                 type;
   SFAssetId                   id;
   std::shared_ptr<SFWindow>   sf_window;
+
+  // Health for objects
+  int                         objHP;
 
   static int SFASSETID;
 };

@@ -41,7 +41,7 @@ public:
   void    OnUpdateWorld();
   void    OnRender();
   void    FireProjectile();
-
+  void    EndGame();
 private:
   // Define any variables to use in SFApp.cpp below.
   SDL_Surface             * surface;
