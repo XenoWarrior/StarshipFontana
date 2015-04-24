@@ -39,25 +39,35 @@ SFApp::~SFApp() {
 void SFApp::OnEvent(SFEvent& event) {
   SFEVENT the_event = event.GetCode();
   // Update event
-  if(the_event == SFEVENT_UPDATE) {
-    OnUpdateWorld();
-    OnRender();
-  }
-  // Quit event
-  if(the_event == SFEVENT_QUIT) {
-    is_running = false;
-    if(currTick > 0){
-      cout << endl << "Time Played: " << ((currTick / 60) / 60) << " minute(s) | " << (currTick / 60) << " second(s)" << endl;
-    }
-    cout << "Enemies Killed: " << enemiesKilled << " | Coins Collected: " << coinsCollected <<  " | Projectiles Fired: " << totalProjectiles << endl << endl;
-  }
-  // Fire event
-  if(the_event == SFEVENT_FIRE){
-    if(fire < maxProjectiles){
-      totalProjectiles++;
-      fire++;
-      FireProjectile();
-    }
+  switch(the_event){
+    case SFEVENT_UPDATE:
+      OnUpdateWorld();
+      OnRender();
+      break;
+    case SFEVENT_QUIT:
+      is_running = false;
+      if(currTick > 0){
+        int min = 0, sec = 0;
+        if(currTick > 60){
+          min = ((currTick / 60) / 60);
+          currTick -= ((min * 60) * 60);
+        }
+        if(currTick > 0){
+          sec = (currTick / 60);
+        }
+        cout << endl << "Time Played: " << min << " minute(s) | " << sec << " second(s)" << endl;
+      }
+      cout << "Enemies Killed: " << enemiesKilled << " | Coins Collected: " << coinsCollected <<  " | Projectiles Fired: " << totalProjectiles << endl << endl;
+      break;
+    case SFEVENT_FIRE:
+      if(fire < maxProjectiles){
+        totalProjectiles++;
+        fire++;
+        FireProjectile();
+      }
+      break;
+    default:
+      break;
   }
 }
 
