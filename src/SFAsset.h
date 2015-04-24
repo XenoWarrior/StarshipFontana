@@ -45,6 +45,8 @@ public:
   virtual void      HandleInput();
   virtual int       GetHealth();
   virtual void      SetHealth(int val);
+  virtual int       GetScore();
+  virtual void      SetScore(int val);
 
   virtual bool      CollidesWith(shared_ptr<SFAsset>);;
   virtual shared_ptr<SFBoundingBox> GetBoundingBox();
@@ -59,8 +61,8 @@ private:
   SFAssetId                   id;
   std::shared_ptr<SFWindow>   sf_window;
 
-  // Health for objects
   int                         objHP;
+  int                         playerScore;
 
   static int SFASSETID;
 };

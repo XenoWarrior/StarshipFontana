@@ -32,6 +32,7 @@ SFApp::SFApp(std::shared_ptr<SFWindow> window) : fire(0), is_running(true), sf_w
   auto player_pos = Point2(canvas_w / 2.0f, 88.0f);
   player->SetPosition(player_pos);
   player->SetHealth(100);
+  player->SetScore(10);
 
   const int number_of_aliens = 10;
   for(int i = 0; i < number_of_aliens; i++) {
@@ -55,6 +56,8 @@ SFApp::SFApp(std::shared_ptr<SFWindow> window) : fire(0), is_running(true), sf_w
     coins.push_back(coin);
   }
   cout << endl << "Welcome to the game, you have " << player->GetHealth() << " HP." << endl;
+  cout << "You start with " << player->GetScore() << " points, use these points wisely as each bullet will take one point." << endl;
+  cout << "Hitting enemy will give you back the point, killing will give you 10 points." << endl << "Running out of points or death is game over!" << endl;
 }
 
 SFApp::~SFApp() {
@@ -225,10 +228,12 @@ void SFApp::OnUpdateWorld() {
       if(p->CollidesWith(a)) {
         // Handle the collisions for both projectile and enemy
         p->HandleCollision();
+        player->SetScore(player->GetScore() + 1);
         
         // If HandleCollision returns a special value (1) to show enemy run out of HP
         if(a->HandleCollision() == 1){
           // Add to our counter for 
+          player->SetScore(player->GetScore() + 10);
           enemiesKilled++;
         }
       }
@@ -346,6 +351,8 @@ void SFApp::FireProjectile() {
 
   // Push back to array
   projectiles.push_back(pb);
+
+  player->SetScore(player->GetScore() - 1);
 }
 
 void SFApp::EndGame(){
@@ -374,4 +381,5 @@ void SFApp::EndGame(){
   }
   // This will show the player what they did during their session.
   cout << "Enemies Killed: " << enemiesKilled << " | Coins Collected: " << coinsCollected <<  " | Projectiles Fired: " << totalProjectiles << endl << endl;
+  cout << endl << "Total Score: " << player->GetScore() << endl;
 }

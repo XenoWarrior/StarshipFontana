@@ -132,6 +132,21 @@ void SFAsset::SetHealth(int val) {
 }
 
 /*********************************************************
+  Will get the player score
+*********************************************************/
+int SFAsset::GetScore() {
+  return playerScore;
+}
+
+/*********************************************************
+  Will set the player score
+*********************************************************/
+void SFAsset::SetScore(int val) {
+  this->playerScore = val;
+  cout << "Set score to: " << val << endl;
+}
+
+/*********************************************************
   Display the object on the render window
 *********************************************************/
 void SFAsset::OnRender() {
@@ -374,7 +389,8 @@ bool SFAsset::IsAlive() {
 // Specific collision handling for enemy to player
 void SFAsset::HandlePlayerCollision(){
   if(SFASSET_ALIEN == type){
-    this->SetNotAlive();
+    auto pos  = Point2(rand() % 600 + 32, rand() % 400 + 600);
+    this->SetPosition(pos);
   }
 }
 
