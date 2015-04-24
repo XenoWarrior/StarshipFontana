@@ -1,10 +1,39 @@
+/*********************************************************
+  This is the asset class that is responsible for making
+  object for in-game. 
+
+  It will actually create, render and control objects.
+
+  If any objects are to be modified externally, you need to
+  get the object from an array or know what variable it is stored as
+  and call:
+    object->Action();
+  For modifying directly, it is simply:
+    this->Action();
+
+  It is "this" because when object->Action(); is called, it
+  sends a message from the object to here and knows what it
+  was called from.
+*********************************************************/
+
 #include "SFAsset.h"
 
+// Set ID numbers to each asset
 int SFAsset::SFASSETID=0;
 
+/*********************************************************
+  This is the main code for SFAsset.cpp
+
+  It will be used to setup each object in-game by giving
+  it a sprite based on the passed type and applying it to
+  the window specified.
+*********************************************************/
 SFAsset::SFAsset(SFASSETTYPE type, std::shared_ptr<SFWindow> window): type(type), sf_window(window) {
+
+  // Set the asset ID.
   this->id   = ++SFASSETID;
 
+  // Setup what sprite this asset will use
   switch (type) {
     case SFASSET_PLAYER:
       sprite = IMG_LoadTexture(sf_window->getRenderer(), "assets/player.png");
@@ -23,6 +52,7 @@ SFAsset::SFAsset(SFASSETTYPE type, std::shared_ptr<SFWindow> window): type(type)
       break;
   }
 
+  // If the sprite was not set, then throw an error as it may not exist
   if(!sprite) {
     cerr << "Could not load asset of type " << type << endl;
     throw SF_ERROR_LOAD_ASSET;
@@ -65,23 +95,31 @@ Vector2 GameSpaceToScreenSpace(SDL_Renderer* renderer, Vector2 &r) {
   return Vector2 (r.getX(), (h - r.getY()));
 }
 
-// Setting object position
+/*********************************************************
+  sets the asset position on screen
+*********************************************************/
 void SFAsset::SetPosition(Point2 & point) {
   Vector2 v(point.getX(), point.getY());
   bbox->SetCentre(v);
 }
 
-// Getting object position
+/*********************************************************
+  Returns position of object
+*********************************************************/
 Point2 SFAsset::GetPosition() {
   return Point2(bbox->centre->getX(), bbox->centre->getY());
 }
 
-// Getting object ID
+/*********************************************************
+  Will get the object ID
+*********************************************************/
 SFAssetId SFAsset::GetId() {
   return id;
 }
 
-// Rendering object
+/*********************************************************
+  Display the object on the render window
+*********************************************************/
 void SFAsset::OnRender() {
   // 1. Get the SDL_Rect from SFBoundingBox
   SDL_Rect rect;
@@ -97,10 +135,33 @@ void SFAsset::OnRender() {
   SDL_RenderCopy(sf_window->getRenderer(), sprite, NULL, &rect);
 }
 
-// Handling global movement WEST (LEFT)
+/*********************************************************
+  Makes the objects move
+
+  To reduce amount of code needed, you can just do:
+    obj->GoWest();
+
+  Then in the GoWest() method, define a new SFAsset so each
+  different assets have individual movement patterns rather than
+  making a new method to handle movement for other assets.
+
+  This is the same for all below methods:
+    GoWest();
+    GoEast();
+    GoNorth();
+    GoSouth();
+
+  Each movement is similar, but they're all set to different
+  speeds in Vector2
+  (Vector2(XMove, YMove))
+*********************************************************/
 void SFAsset::GoWest() {
+  // Checks if the asset player is the type in this call
 	if(SFASSET_PLAYER == type) {
+    // Setup our new vector
 	  Vector2 c = *(bbox->centre) + Vector2(-5.0f, 0.0f);
+
+    // If not at the left of screen, allow it to move
 	  if(!(c.getX()-32.0f < 0)) {
 	    bbox->centre.reset();
 	    bbox->centre = make_shared<Vector2>(c);
@@ -108,22 +169,29 @@ void SFAsset::GoWest() {
 	}
 }
 
-// Handling global movement EAST (RIGHT)
 void SFAsset::GoEast() {
+  // For this to stop instances going off-screen
+  // need to get height and width of screen
 	int w, h;
 	SDL_GetRendererOutputSize(sf_window->getRenderer(), &w, &h);
 
   // Handle movement for type player
   if(SFASSET_PLAYER == type) {
+    // Setup our new vector
 		Vector2 c = *(bbox->centre) + Vector2(5.0f, 0.0f);
+
+    // If not at the left of screen, allow it to move
 		if(!(c.getX()+32.0f > w)) {
 		  bbox->centre.reset();
 		  bbox->centre = make_shared<Vector2>(c);
 		}
 	}
 
+  // Handle for type wall (only for current testing based on new idea)
   if(SFASSET_WALL == type) {
     Vector2 c = *(bbox->centre) + Vector2(5.0f, 0.0f);
+
+    // If not at the left of screen: allow it to move, else: reset position.
     if(!(c.getX()-32.0f > w)) {
       bbox->centre.reset();
       bbox->centre = make_shared<Vector2>(c);
@@ -135,7 +203,6 @@ void SFAsset::GoEast() {
   }
 }
 
-// Handling global movement NORTH (UP)
 void SFAsset::GoNorth() {
 	int w, h;
 	SDL_GetRendererOutputSize(sf_window->getRenderer(), &w, &h);
@@ -154,7 +221,7 @@ void SFAsset::GoNorth() {
   // Handle movement for type projectile
 	if(SFASSET_PROJECTILE == type){
 	  Vector2 c = *(bbox->centre) + Vector2(0.0f, 10.0f);
-    if(!(c.getY()-18.0f > h)) {
+    if(!(c.getY() > h + 32.0f)) {
       bbox->centre.reset();
       bbox->centre = make_shared<Vector2>(c);
     }
@@ -164,7 +231,6 @@ void SFAsset::GoNorth() {
 	}
 }
 
-// Handling global movement SOUTH (DOWN)
 void SFAsset::GoSouth() {
   // Handle movement for type player
 	if(SFASSET_PLAYER == type) {
@@ -205,15 +271,23 @@ void SFAsset::GoSouth() {
 	}
 }
 
-// Handle player input
+/*********************************************************
+  As mentioned in SFApp.cpp, this is my own movement
+  handler.
+
+  It works by checking the keyboard state and scanning for
+  the code.
+
+  It basically consits of:
+    Keyboard movement
+    Mouse movement
+*********************************************************/
 void SFAsset::HandleInput(){
   int w, h;
   SDL_GetRendererOutputSize(sf_window->getRenderer(), &w, &h);
 
-  /*
-    This section of the code handles keyboard input
-    Mostly used for player movement and projectile firing
-  */
+  // This section of the code handles keyboard input
+  // Used for nice player movement.
   const Uint8 *keyboardState = SDL_GetKeyboardState(NULL);
   if(keyboardState[SDL_SCANCODE_DOWN]) {
     this->GoSouth();
@@ -239,21 +313,29 @@ void SFAsset::HandleInput(){
   if(SDL_GetMouseState(NULL, NULL) == 1){
     //Now possible to move player towards mouse -- WORK IN PROGRESS
     auto pPos = this->GetPosition();
+
+    // Due to some co-ordinate issues, this is here to make sure it moves to the mouse properly.
     int mouseYFix = (w - mouseY);
+    // Move on X axis
     if(pPos.getX() > mouseX){
       this->GoWest();
     }
     if(pPos.getX() < mouseX){
       this->GoEast();
     }
+
+    // Move on U axis
     if(pPos.getY() > mouseYFix){
       this->GoSouth();
     }
     if(pPos.getY() < mouseYFix){
       this->GoNorth();
     }
-    cout << "M: " << mouseX << "x" << mouseYFix << " | P: " << pPos.getX() << "x" << pPos.getY() << endl;
+    
+    // Some loud/spammy debug. ;)
+    //cout << "M: " << mouseX << "x" << mouseYFix << " | P: " << pPos.getX() << "x" << pPos.getY() << endl;
   }
+
   // Check for right pressed
   if(SDL_GetMouseState(NULL, NULL) == 4) {
     cout << "Right mouse pressed!" << endl;
@@ -285,14 +367,15 @@ void SFAsset::HandleCollision() {
   if(SFASSET_PROJECTILE == type) {
     SetNotAlive();
   }
-  // Collisions for aliens
-	if(SFASSET_ALIEN == type){
-		int canvas_w, canvas_h;
-		SDL_GetRendererOutputSize(sf_window->getRenderer(), &canvas_w, &canvas_h);
 
-  	auto pos  = Point2(rand() % 600 + 32, rand() % 400 + 600);
+  // Collisions for aliens
+  if(SFASSET_ALIEN == type){
+    int canvas_w, canvas_h;
+    SDL_GetRendererOutputSize(sf_window->getRenderer(), &canvas_w, &canvas_h);
+
+    auto pos  = Point2(rand() % 600 + 32, rand() % 400 + 600);
     this->SetPosition(pos);
-	}	
+  }
 
 	// Collisions for coins
 	if(SFASSET_COIN == type) {

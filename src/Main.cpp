@@ -1,3 +1,11 @@
+/*********************************************************
+  This is the main set of code that will execute to
+  initialise all of our libraries such as SDL 2 and _image
+
+  It will create our window and call OnExecute to start
+  the main game.
+*********************************************************/
+
 #include <SDL2/SDL.h> // Pull in the SDL definitions
 #include <vector>     // Pull in the std::vector
 #include <memory>     // Pull in std::shared_ptr
@@ -25,8 +33,11 @@ Uint32 PushUpdateEvent(Uint32 interval, void *param) {
 }
 
 SFError InitGraphics() {
+  // Setup screen height and width
   Uint32 width = 640;
   Uint32 height = 480;
+
+  // Setup colour depth and delay
   Uint32 colour_depth = 16; // in bits
   Uint32 delay = 1000/60; // in milliseconds
 
@@ -67,11 +78,12 @@ int main(int arc, char ** argv) {
   // Initialise graphics context
   try {
     InitGraphics();
-  } catch (SFError e) {
+  }
+  catch (SFError e) {
     return e;
   }
 
-  // Initialise world
+  // Initialise world, setup window and make a new SFApp object (window).
   std::shared_ptr<SFWindow> window = make_shared<SFWindow>(g_window, g_renderer);
   sfapp = shared_ptr<SFApp>(new SFApp(window));
 
