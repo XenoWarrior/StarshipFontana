@@ -450,11 +450,9 @@ int SFAsset::HandleCollision() {
 
 	// Collisions for coins
 	if(SFASSET_COIN == type) {
-		int canvas_w, canvas_h;
-		SDL_GetRendererOutputSize(sf_window->getRenderer(), &canvas_w, &canvas_h);
-
-  	auto pos  = Point2(rand() % 600 + 32, rand() % 400 + 600);
-    this->SetPosition(pos);
+    // Kill the coin
+    this->SetNotAlive();
+    return 1;
 	}
   return 0;
 }

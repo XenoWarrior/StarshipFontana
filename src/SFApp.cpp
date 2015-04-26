@@ -55,6 +55,7 @@ SFApp::SFApp(std::shared_ptr<SFWindow> window) : fire(0), is_running(true), sf_w
     coin->SetPosition(pos);
     coins.push_back(coin);
   }
+
   cout << endl << "Welcome to the game, you have " << player->GetHealth() << " HP." << endl;
   cout << "You start with " << player->GetScore() << " points, use these points wisely as each bullet will use 1 point." << endl;
   cout << "Hitting enemy will give you back the point, killing will give you 10 points." << endl << "Running out of points or death is game over!" << endl << endl;
@@ -195,13 +196,16 @@ void SFApp::OnUpdateWorld() {
     // Check player collision with coin
     if(player->CollidesWith(c)) {
       // Output a message
-      cout << "Collected coin!" << endl;
+      cout << "Power up! You can now fire more projectiles!" << endl;
       
       // Handle the collision
-      c->HandleCollision();
-        
-      // Add to our counter for this session
-      coinsCollected++;
+      if(c->HandleCollision()){
+        // Add to our counter for this session
+        coinsCollected++;
+
+        // allow more firepower for the player
+        maxProjectiles += 1;
+      }
     }
   }
 
@@ -224,7 +228,7 @@ void SFApp::OnUpdateWorld() {
       enemiesKilled++;
 
       // Output left over health after collision
-      cout << "Crashed with an enemy" << a->GetId() << "! Taking 10 damage. (PlayerHP: " << player->GetHealth() << ")" << endl;
+      cout << "Crashed with an enemy " << a->GetId() << "! Taking 10 damage. (PlayerHP: " << player->GetHealth() << ")" << endl;
     }
   }
 
@@ -241,15 +245,35 @@ void SFApp::OnUpdateWorld() {
     for(auto a : aliens) {
       // If the projectile collides with the alien
       if(p->CollidesWith(a)) {
+        // Get the alien position
+        auto aPos = a->GetPosition();
+        
         // Handle the collisions for both projectile and enemy
         p->HandleCollision();
+
+        // Set the score back up as the projectile hit
         player->SetScore(player->GetScore() + 1);
         
         // If HandleCollision returns a special value (1) to show enemy run out of HP
         if(a->HandleCollision() == 1){
-          // Add to our counter for 
+          // Add 10 points to score
           player->SetScore(player->GetScore() + 10);
+
+          // Add to our counter for the kill
           enemiesKilled++;
+
+          // Decide if a collectible should be dropped
+          int check = (rand() % 600 + 32);
+          if(check >= 200 && check <= 400){
+            // Output some message
+            cout << "Power up dropped!" << endl;
+
+            // Drop some loot
+            auto coin = make_shared<SFAsset>(SFASSET_COIN, sf_window);
+            auto pos  = Point2(aPos);
+            coin->SetPosition(pos);
+            coins.push_back(coin);
+          }
         }
       }
     }
@@ -287,6 +311,20 @@ void SFApp::OnUpdateWorld() {
   // Clear old bullets and set alive ones back to array
   projectiles.clear();
   projectiles = list<shared_ptr<SFAsset>>(projTemp);
+
+  // Remove all dead collectibles
+  list<shared_ptr<SFAsset>> collTemp;
+  // For each coin
+  for(auto c : coins) {
+    // Check if alive
+    if(c->IsAlive()) {
+      // Add alive to new temp array
+      collTemp.push_back(c);
+    }
+  }
+  // Clear old coins and set alive ones back to array
+  coins.clear();
+  coins = list<shared_ptr<SFAsset>>(collTemp);
 
   // Increase the tick counter (used to calculate time played)
   currTick++;
