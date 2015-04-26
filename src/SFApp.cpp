@@ -88,7 +88,14 @@ void SFApp::OnEvent(SFEvent& event) {
     // This is the update event returned from SFEvent::GetCode();
     case SFEVENT_UPDATE: {
       // Update world and renderer.
-      OnUpdateWorld();
+      
+      // Check if the game is paused
+      if(!is_paused){
+        // Not paused, update world.
+        OnUpdateWorld();
+      }
+
+      // Render objects
       OnRender();
 
       // Break out of switch statement.
@@ -101,18 +108,26 @@ void SFApp::OnEvent(SFEvent& event) {
       // Break out of switch statement.
       break;
     }
+    // This allows the game to be paused
+    case SFEVENT_PAUSE:{
+      PauseGame();
+      break;
+    }
     // This handles the firing of projectiles, this has been left here so it only checks and delays rapid firing.
     case SFEVENT_FIRE: {
-      // Check if we can fire (maxProjectiles limits the total on screen allowed)
-      if(fire < maxProjectiles){
-        // Count how many projectiles were fired in the entire session.
-        totalProjectiles++;
+      // Make sure game is not paused
+      if(!is_paused){
+        // Check if we can fire (maxProjectiles limits the total on screen allowed)
+        if(fire < maxProjectiles){
+          // Count how many projectiles were fired in the entire session.
+          totalProjectiles++;
 
-        // Add to the fire limit counter.
-        fire++;
+          // Add to the fire limit counter.
+          fire++;
 
-        // Fire a projectile.
-        FireProjectile();
+          // Fire a projectile.
+          FireProjectile();
+        }
       }
       // Break out of statement.
       break;
@@ -355,6 +370,16 @@ void SFApp::FireProjectile() {
   player->SetScore(player->GetScore() - 1);
 }
 
+/***********************************************************
+  Ends the game.
+
+  This was moved into a method so the game could be ended
+  in different ways. Since the player can die, it would be
+  crucial to have this accessible by any of the methods.
+
+  Also using it as a method prevents re-using the same code
+  two times in different places.
+***********************************************************/
 void SFApp::EndGame(){
   // This will simply calculate the time that the player has spent playing the game.
   // To ensure we don't do a a division by 0 (very unlikely).
@@ -382,4 +407,15 @@ void SFApp::EndGame(){
   // This will show the player what they did during their session.
   cout << "Enemies Killed: " << enemiesKilled << " | Coins Collected: " << coinsCollected <<  " | Projectiles Fired: " << totalProjectiles << endl << endl;
   cout << endl << "Total Score: " << player->GetScore() << endl;
+}
+
+void SFApp::PauseGame(){
+  if(is_paused){
+    is_paused = false;
+    cout << "Unpaused game!" << endl;
+  }
+  else{
+    is_paused = true;
+    cout << "Paused game!" << endl;
+  }
 }

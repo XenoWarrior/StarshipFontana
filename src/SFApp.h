@@ -42,10 +42,12 @@ public:
   void    OnRender();
   void    FireProjectile();
   void    EndGame();
+  void    PauseGame();
 private:
   // Define any variables to use in SFApp.cpp below.
   SDL_Surface             * surface;
   bool                    is_running;
+  bool                    is_paused = false;
 
   // Window pointer
   shared_ptr<SFWindow>        sf_window;

@@ -29,6 +29,10 @@ SFEvent::SFEvent(const SDL_Event & event) {
         case SDLK_q:
           code = SFEVENT_QUIT;
           break;
+        // Pausing game
+        case SDLK_p:
+          code = SFEVENT_PAUSE;
+          break;
       }
       break;
     // NULL event as there was nothing going on
