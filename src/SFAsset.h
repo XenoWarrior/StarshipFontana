@@ -47,7 +47,9 @@ public:
   virtual void      SetHealth(int val);
   virtual int       GetScore();
   virtual void      SetScore(int val);
-
+  virtual int       GetDiff();
+  virtual void      SetDiff(int val);
+  
   virtual bool      CollidesWith(shared_ptr<SFAsset>);;
   virtual shared_ptr<SFBoundingBox> GetBoundingBox();
 private:
@@ -63,6 +65,7 @@ private:
 
   int                         objHP;
   int                         playerScore;
+  int                         gameDifficulty = 0;
 
   static int SFASSETID;
 };

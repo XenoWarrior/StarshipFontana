@@ -32,6 +32,7 @@ SFAsset::SFAsset(SFASSETTYPE type, std::shared_ptr<SFWindow> window): type(type)
 
   // Set the asset ID.
   this->id   = ++SFASSETID;
+  this->gameDifficulty   = gameDifficulty;
 
   // Setup what sprite this asset will use
   switch (type) {
@@ -144,6 +145,23 @@ int SFAsset::GetScore() {
 void SFAsset::SetScore(int val) {
   this->playerScore = val;
   cout << "Set score to: " << val << endl;
+}
+
+/*********************************************************
+  Will get the game difficulty modifier
+*********************************************************/
+int SFAsset::GetDiff() {
+  return gameDifficulty;
+}
+/*********************************************************
+  Will set the game difficulty modifier
+*********************************************************/
+void SFAsset::SetDiff(int val) {
+  // Output message stating thing are eaier or harder.
+  cout << (val > gameDifficulty ? "Making the game harder!" : "Making the game easier!") << " Stage: " << val << " of 5!" << endl;
+
+  // Want to set it to a static value because the difficulty can decrease
+  gameDifficulty = val;
 }
 
 /*********************************************************
@@ -287,7 +305,9 @@ void SFAsset::GoSouth() {
 
   // Handle movement for type alien
 	if(SFASSET_ALIEN == type) {
-		Vector2 c = *(bbox->centre) + Vector2(0.0f, -2.0f);
+    int enemySpeed = (-2 - gameDifficulty);
+     
+		Vector2 c = *(bbox->centre) + Vector2(0.0f, enemySpeed);
 
 		if(!(c.getY() < 0.0f)) {
 			bbox->centre.reset();
@@ -409,7 +429,7 @@ int SFAsset::HandleCollision() {
     // For removing enemy health and checking if it died
     if(this->GetHealth() > 0){
       // Hurt the enemy for 5 HP
-      this->SetHealth(this->GetHealth() - 5);
+      this->SetHealth(this->GetHealth() - (5 - gameDifficulty));
 
       // Get HP as string
       int tempHP = this->GetHealth();
@@ -421,7 +441,7 @@ int SFAsset::HandleCollision() {
       HPTempString = HPConvert.str();
 
       // Tell player it was hurt
-      cout << "Hurt enemy " << this->GetId() << " for 5HP. (EnemyHP: " << (this->GetHealth() <= 0 ? "DEAD" : HPTempString) << ")" << endl;
+      cout << "Hurt enemy " << this->GetId() << " for " << (5 - gameDifficulty) << " HP. (EnemyHP: " << (this->GetHealth() <= 0 ? "DEAD" : HPTempString) << ")" << endl;
 
       // Do another check because we can reach 0, but it won't check until next collision.
       if(this->GetHealth() <= 0){

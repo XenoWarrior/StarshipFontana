@@ -43,6 +43,7 @@ public:
   void    FireProjectile();
   void    EndGame();
   void    PauseGame();
+  void    GameDifficultyModifier(int diff);
 private:
   // Define any variables to use in SFApp.cpp below.
   SDL_Surface             * surface;
@@ -69,6 +70,9 @@ private:
 
   // For calculating time
   int currTick = 0;
+
+  // For game difficulty
+  int gameDifficulty = 0;
 
   // For counting enemies and coins collected
   int enemiesKilled = 0;

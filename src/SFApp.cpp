@@ -59,6 +59,7 @@ SFApp::SFApp(std::shared_ptr<SFWindow> window) : fire(0), is_running(true), sf_w
   cout << endl << "Welcome to the game, you have " << player->GetHealth() << " HP." << endl;
   cout << "You start with " << player->GetScore() << " points, use these points wisely as each bullet will use 1 point." << endl;
   cout << "Hitting enemy will give you back the point, killing will give you 10 points." << endl << "Running out of points or death is game over!" << endl << endl;
+  cout << endl << "Reach stage 5 to encounter the bad guy, b'Kuhn to save Earth's code!" << endl;
 }
 
 SFApp::~SFApp() {
@@ -175,17 +176,37 @@ void SFApp::OnUpdateWorld() {
   // Run the new movement handler for our player
   player->HandleInput();
 
+  // Handle game-over conditions
   if(player->GetHealth() <= 0 || player->GetScore() <= 0){
     cout << endl <<  "Game Over! " << (player->GetHealth() <= 0 ? "You have died!" : (player->GetScore() <= 0 ? "No more points left!" : "")) << endl << "Check your statistics below!" << endl;
     EndGame();
     is_running = false;
   }
 
+  if(player->GetScore() > 1200 && player->GetDiff() != 5) {
+    player->SetDiff(5);
+  }
+  if(player->GetScore() > 1000 && player->GetScore() < 1200 && player->GetDiff() != 4) {
+    player->SetDiff(4);
+    GameDifficultyModifier(player->GetDiff());
+  }
+  if(player->GetScore() > 850 && player->GetScore() < 1000 && player->GetDiff() != 3) {
+    player->SetDiff(3);
+    GameDifficultyModifier(player->GetDiff());
+  }
+  if(player->GetScore() > 600 && player->GetScore() < 850 && player->GetDiff() != 2) {
+    player->SetDiff(2);
+    GameDifficultyModifier(player->GetDiff());
+  }
+  if(player->GetScore() > 300 && player->GetScore() < 600 && player->GetDiff() != 1) {
+    player->SetDiff(1);
+    GameDifficultyModifier(player->GetDiff());
+  }
+
   // Update projectile positions
   for(auto p: projectiles) {
     // Move projectile north
     p->GoNorth();
-
   }
 
   // Update collectible positions and check collisions
@@ -455,5 +476,39 @@ void SFApp::PauseGame(){
   else{
     is_paused = true;
     cout << "Paused game!" << endl;
+  }
+}
+
+void SFApp::GameDifficultyModifier(int diff){
+  if(gameDifficulty < diff){
+    int number_of_aliens;
+    if(diff == 1){
+      number_of_aliens = 2;
+    }
+    else if(diff == 2){
+      number_of_aliens = 3;
+    }
+    else if(diff == 3){
+      number_of_aliens = 5;
+    }
+    else if(diff == 4){
+      number_of_aliens = 9;
+    }
+    else{
+      number_of_aliens = 0;
+    }
+    for(int i = 0; i < number_of_aliens; i++) {
+      // place an alien at width/number_of_aliens * i
+      auto alien = make_shared<SFAsset>(SFASSET_ALIEN, sf_window);
+      auto pos  = Point2(rand() % 600 + 32, rand() % 400 + 600);
+
+      // Make enemy at position and set it's health
+      alien->SetPosition(pos);
+      alien->SetHealth(10);
+
+      aliens.push_back(alien);
+
+      cout << "Created enemy with " << alien->GetHealth() << endl;
+    }
   }
 }
