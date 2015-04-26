@@ -174,8 +174,8 @@ void SFApp::OnUpdateWorld() {
   // Run the new movement handler for our player
   player->HandleInput();
 
-  if(player->GetHealth() <= 0){
-    cout << endl <<  "Game Over! You have died!" << endl << "Check your statistics below!" << endl;
+  if(player->GetHealth() <= 0 || player->GetScore() <= 0){
+    cout << endl <<  "Game Over! " << (player->GetHealth() <= 0 ? "You have died!" : (player->GetScore() <= 0 ? "No more points left!" : "")) << endl << "Check your statistics below!" << endl;
     EndGame();
     is_running = false;
   }
