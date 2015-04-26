@@ -164,7 +164,7 @@ void SFAsset::OnRender() {
   SDL_RenderCopy(sf_window->getRenderer(), sprite, NULL, &rect);
 }
 
-/*********************************************************
+/********************************************************* 
   Makes the objects move
 
   To reduce amount of code needed, you can just do:

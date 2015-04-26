@@ -56,8 +56,8 @@ SFApp::SFApp(std::shared_ptr<SFWindow> window) : fire(0), is_running(true), sf_w
     coins.push_back(coin);
   }
   cout << endl << "Welcome to the game, you have " << player->GetHealth() << " HP." << endl;
-  cout << "You start with " << player->GetScore() << " points, use these points wisely as each bullet will take one point." << endl;
-  cout << "Hitting enemy will give you back the point, killing will give you 10 points." << endl << "Running out of points or death is game over!" << endl;
+  cout << "You start with " << player->GetScore() << " points, use these points wisely as each bullet will use 1 point." << endl;
+  cout << "Hitting enemy will give you back the point, killing will give you 10 points." << endl << "Running out of points or death is game over!" << endl << endl;
 }
 
 SFApp::~SFApp() {
