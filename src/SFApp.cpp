@@ -50,10 +50,17 @@ SFApp::SFApp(std::shared_ptr<SFWindow> window) : fire(0), is_running(true), sf_w
   }
 
   for(int i = 0; i < 2; i++) {
+    // Spawn in coins
     auto coin = make_shared<SFAsset>(SFASSET_COIN, sf_window);
     auto pos  = Point2(rand() % 600 + 32, rand() % 400 + 600);
     coin->SetPosition(pos);
     coins.push_back(coin);
+  }
+  for(int i = 0; i < 2; i++){
+    auto star = make_shared<SFAsset>(SFASSET_STARS, sf_window);
+    auto pos = (i == 0 ? Point2(320, 1000) : Point2(320, 1800));
+    star->SetPosition(pos);
+    stars.push_back(star);
   }
 
   cout << endl << "Welcome to the game, you have " << player->GetHealth() << " HP." << endl;
@@ -183,36 +190,40 @@ void SFApp::OnUpdateWorld() {
     is_running = false;
   }
 
-  if(player->GetScore() > 1200 && player->GetDiff() != 5) {
-    player->SetDiff(5);
+  if(player->GetScore() > 1200 && gameDifficulty != 5) {
+    gameDifficulty = 5;
   }
-  if(player->GetScore() > 1000 && player->GetScore() < 1200 && player->GetDiff() != 4) {
-    player->SetDiff(4);
-    GameDifficultyModifier(player->GetDiff());
+  if(player->GetScore() > 1000 && player->GetScore() < 1200 && gameDifficulty != 4) {
+    gameDifficulty = 4;
+    GameDifficultyModifier(gameDifficulty);
   }
-  if(player->GetScore() > 850 && player->GetScore() < 1000 && player->GetDiff() != 3) {
-    player->SetDiff(3);
-    GameDifficultyModifier(player->GetDiff());
+  if(player->GetScore() > 850 && player->GetScore() < 1000 && gameDifficulty != 3) {
+    gameDifficulty = 3;
+    GameDifficultyModifier(gameDifficulty);
   }
-  if(player->GetScore() > 600 && player->GetScore() < 850 && player->GetDiff() != 2) {
-    player->SetDiff(2);
-    GameDifficultyModifier(player->GetDiff());
+  if(player->GetScore() > 600 && player->GetScore() < 850 && gameDifficulty != 2) {
+    gameDifficulty = 2;
+    GameDifficultyModifier(gameDifficulty);
   }
-  if(player->GetScore() > 300 && player->GetScore() < 600 && player->GetDiff() != 1) {
-    player->SetDiff(1);
-    GameDifficultyModifier(player->GetDiff());
+  if(player->GetScore() > 300 && player->GetScore() < 600 && gameDifficulty != 1) {
+    gameDifficulty = 1;
+    GameDifficultyModifier(gameDifficulty);
   }
 
   // Update projectile positions
   for(auto p: projectiles) {
     // Move projectile north
-    p->GoNorth();
+    p->GoNorth(10.0f);
+  }
+
+  for(auto s : stars){ 
+    s->GoSouth(-0.5f - (gameDifficulty / 2));
   }
 
   // Update collectible positions and check collisions
   for(auto c : coins) {
     // Move collectible coin south
-		c->GoSouth();
+		c->GoSouth(-1.0f);
 
     // Check player collision with coin
     if(player->CollidesWith(c)) {
@@ -233,7 +244,7 @@ void SFApp::OnUpdateWorld() {
   // Update enemy positions and check player collisions
   for(auto a : aliens) {
     // Move the enemy south
-    a->GoSouth();
+    a->GoSouth(-2.0f - gameDifficulty);
 
     // Check if player collides with enemy
     if(player->CollidesWith(a)) {
@@ -251,13 +262,6 @@ void SFApp::OnUpdateWorld() {
       // Output left over health after collision
       cout << "Crashed with an enemy " << a->GetId() << "! Taking 10 damage. (PlayerHP: " << player->GetHealth() << ")" << endl;
     }
-  }
-
-  // This is a new idea I am implementing, the walls will actually move along screen and hit the player
-  // Not sure if I will keep this, but let us see how it goes.
-  for(auto w: walls) {
-    // Move wall east
-    w->GoEast();
   }
 
   // Check for collisions on projectiles
@@ -371,6 +375,11 @@ void SFApp::OnUpdateWorld() {
 void SFApp::OnRender() {
   SDL_RenderClear(sf_window->getRenderer());
 
+  // Render walls that are currently alive
+  for(auto s: stars) {
+    s->OnRender();
+  }
+
   // Draw the player (SFAsset::OnRender();)!
   player->OnRender();
 
@@ -480,6 +489,7 @@ void SFApp::PauseGame(){
 }
 
 void SFApp::GameDifficultyModifier(int diff){
+  cout << "Changing game stage... Stage " << diff << " of 5." << endl << (gameDifficulty > diff ? "The game will get harder!" : "The game will get easier!") << endl;
   if(gameDifficulty < diff){
     int number_of_aliens;
     if(diff == 1){

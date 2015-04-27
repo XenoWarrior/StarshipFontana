@@ -32,7 +32,6 @@ SFAsset::SFAsset(SFASSETTYPE type, std::shared_ptr<SFWindow> window): type(type)
 
   // Set the asset ID.
   this->id   = ++SFASSETID;
-  this->gameDifficulty   = gameDifficulty;
 
   // Setup what sprite this asset will use
   switch (type) {
@@ -50,6 +49,9 @@ SFAsset::SFAsset(SFASSETTYPE type, std::shared_ptr<SFWindow> window): type(type)
       break;
     case SFASSET_WALL: 
       sprite = IMG_LoadTexture(sf_window->getRenderer(), "assets/wall.png");
+      break;
+    case SFASSET_STARS: 
+      sprite = IMG_LoadTexture(sf_window->getRenderer(), "assets/stars.png");
       break;
   }
 
@@ -148,23 +150,6 @@ void SFAsset::SetScore(int val) {
 }
 
 /*********************************************************
-  Will get the game difficulty modifier
-*********************************************************/
-int SFAsset::GetDiff() {
-  return gameDifficulty;
-}
-/*********************************************************
-  Will set the game difficulty modifier
-*********************************************************/
-void SFAsset::SetDiff(int val) {
-  // Output message stating thing are eaier or harder.
-  cout << (val > gameDifficulty ? "Making the game harder!" : "Making the game easier!") << " Stage: " << val << " of 5!" << endl;
-
-  // Want to set it to a static value because the difficulty can decrease
-  gameDifficulty = val;
-}
-
-/*********************************************************
   Display the object on the render window
 *********************************************************/
 void SFAsset::OnRender() {
@@ -202,11 +187,11 @@ void SFAsset::OnRender() {
   speeds in Vector2
   (Vector2(XMove, YMove))
 *********************************************************/
-void SFAsset::GoWest() {
+void SFAsset::GoWest(float speed) {
   // Checks if the asset player is the type in this call
 	if(SFASSET_PLAYER == type) {
     // Setup our new vector
-	  Vector2 c = *(bbox->centre) + Vector2(-5.0f, 0.0f);
+	  Vector2 c = *(bbox->centre) + Vector2(speed, 0.0f);
 
     // If not at the left of screen, allow it to move
 	  if(!(c.getX()-32.0f < 0)) {
@@ -216,7 +201,7 @@ void SFAsset::GoWest() {
 	}
 }
 
-void SFAsset::GoEast() {
+void SFAsset::GoEast(float speed) {
   // For this to stop instances going off-screen
   // need to get height and width of screen
 	int w, h;
@@ -225,7 +210,7 @@ void SFAsset::GoEast() {
   // Handle movement for type player
   if(SFASSET_PLAYER == type) {
     // Setup our new vector
-		Vector2 c = *(bbox->centre) + Vector2(5.0f, 0.0f);
+		Vector2 c = *(bbox->centre) + Vector2(speed, 0.0f);
 
     // If not at the left of screen, allow it to move
 		if(!(c.getX()+32.0f > w)) {
@@ -236,7 +221,7 @@ void SFAsset::GoEast() {
 
   // Handle for type wall (only for current testing based on new idea)
   if(SFASSET_WALL == type) {
-    Vector2 c = *(bbox->centre) + Vector2(5.0f, 0.0f);
+    Vector2 c = *(bbox->centre) + Vector2(speed, 0.0f);
 
     // If not at the left of screen: allow it to move, else: reset position.
     if(!(c.getX()-32.0f > w)) {
@@ -250,14 +235,14 @@ void SFAsset::GoEast() {
   }
 }
 
-void SFAsset::GoNorth() {
+void SFAsset::GoNorth(float speed) {
 	int w, h;
 	SDL_GetRendererOutputSize(sf_window->getRenderer(), &w, &h);
 
   // Handle movement for type player
   if(SFASSET_PLAYER == type) {
 
-		Vector2 c = *(bbox->centre) + Vector2(0.0f, 4.0f);
+		Vector2 c = *(bbox->centre) + Vector2(0.0f, speed);
 
 		if(!(c.getY()-18.0f > h)) {
 		  bbox->centre.reset();
@@ -267,7 +252,7 @@ void SFAsset::GoNorth() {
 
   // Handle movement for type projectile
 	if(SFASSET_PROJECTILE == type){
-	  Vector2 c = *(bbox->centre) + Vector2(0.0f, 10.0f);
+	  Vector2 c = *(bbox->centre) + Vector2(0.0f, speed);
     if(!(c.getY() > h + 32.0f)) {
       bbox->centre.reset();
       bbox->centre = make_shared<Vector2>(c);
@@ -278,10 +263,10 @@ void SFAsset::GoNorth() {
 	}
 }
 
-void SFAsset::GoSouth() {
+void SFAsset::GoSouth(float speed) {
   // Handle movement for type player
 	if(SFASSET_PLAYER == type) {
-		Vector2 c = *(bbox->centre) + Vector2(0.0f, -2.0f);
+		Vector2 c = *(bbox->centre) + Vector2(0.0f, speed);
 
 		if(!(c.getY() < 64.0f)) {
 		  bbox->centre.reset();
@@ -290,24 +275,37 @@ void SFAsset::GoSouth() {
 	}
 
   // Handle movement for type coin
-	if(SFASSET_COIN == type) {
-		Vector2 c = *(bbox->centre) + Vector2(0.0f, -1.0f);
+  if(SFASSET_COIN == type) {
+    Vector2 c = *(bbox->centre) + Vector2(0.0f, speed);
 
-		if(!(c.getY() < 0.0f)) {
-			bbox->centre.reset();
-			bbox->centre = make_shared<Vector2>(c);
-		}
-		else{
-    	auto pos  = Point2(rand() % 600 + 32, rand() % 400 + 600);
+    if(!(c.getY() < 0.0f)) {
+      bbox->centre.reset();
+      bbox->centre = make_shared<Vector2>(c);
+    }
+    else{
+      auto pos  = Point2(rand() % 600 + 32, rand() % 400 + 600);
       this->SetPosition(pos);
-		}
-	}
+    }
+  }
+
+  // Handle movement for the background
+  if(SFASSET_STARS == type) {
+    Vector2 c = *(bbox->centre) + Vector2(0.0f, speed);
+
+    if(!(c.getY() < 0.0f)) {
+      bbox->centre.reset();
+      bbox->centre = make_shared<Vector2>(c);
+    }
+    else{
+      cout << "Resetting gb pos." << endl;
+      auto pos  = Point2(320, 1800);
+      this->SetPosition(pos);
+    }
+  }
 
   // Handle movement for type alien
-	if(SFASSET_ALIEN == type) {
-    int enemySpeed = (-2 - gameDifficulty);
-     
-		Vector2 c = *(bbox->centre) + Vector2(0.0f, enemySpeed);
+	if(SFASSET_ALIEN == type) {     
+		Vector2 c = *(bbox->centre) + Vector2(0.0f, speed);
 
 		if(!(c.getY() < 0.0f)) {
 			bbox->centre.reset();
@@ -340,50 +338,16 @@ void SFAsset::HandleInput(){
   // Used for nice player movement.
   const Uint8 *keyboardState = SDL_GetKeyboardState(NULL);
   if(keyboardState[SDL_SCANCODE_DOWN]) {
-    this->GoSouth();
+    this->GoSouth(-2.0f);
   }
   if(keyboardState[SDL_SCANCODE_UP]) {
-    this->GoNorth();
+    this->GoNorth(4.0f);
   }
   if(keyboardState[SDL_SCANCODE_LEFT]) {
-    this->GoWest();
+    this->GoWest(-5.0f);
   }
   if(keyboardState[SDL_SCANCODE_RIGHT]) {
-    this->GoEast();
-  }
-  
-  // This section of the code handles mouse input
-  // Mostly used to move player (optional and very WIP)
-  int mouseX, mouseY;
-  SDL_GetMouseState(&mouseX, &mouseY);
-
-  // Check for left pressed
-  if(SDL_GetMouseState(NULL, NULL) == 1){
-    //Now possible to move player towards mouse -- WORK IN PROGRESS
-    auto pPos = this->GetPosition();
-
-    // Due to some co-ordinate issues, this is here to make sure it moves to the mouse properly.
-    int mouseYFix = (w - mouseY);
-    // Move on X axis
-    if(pPos.getX() > mouseX){
-      this->GoWest();
-    }
-    if(pPos.getX() < mouseX){
-      this->GoEast();
-    }
-
-    // Move on U axis
-    if(pPos.getY() > mouseYFix){
-      this->GoSouth();
-    }
-    if(pPos.getY() < mouseYFix){
-      this->GoNorth();
-    }
-  }
-
-  // Check for right pressed
-  if(SDL_GetMouseState(NULL, NULL) == 4) {
-    cout << "Right mouse pressed!" << endl;
+    this->GoEast(5.0f);
   }
 }
 
@@ -429,7 +393,7 @@ int SFAsset::HandleCollision() {
     // For removing enemy health and checking if it died
     if(this->GetHealth() > 0){
       // Hurt the enemy for 5 HP
-      this->SetHealth(this->GetHealth() - (5 - gameDifficulty));
+      this->SetHealth(this->GetHealth() - 5);
 
       // Get HP as string
       int tempHP = this->GetHealth();
@@ -441,7 +405,7 @@ int SFAsset::HandleCollision() {
       HPTempString = HPConvert.str();
 
       // Tell player it was hurt
-      cout << "Hurt enemy " << this->GetId() << " for " << (5 - gameDifficulty) << " HP. (EnemyHP: " << (this->GetHealth() <= 0 ? "DEAD" : HPTempString) << ")" << endl;
+      cout << "Hurt enemy " << this->GetId() << " for 5 HP. (EnemyHP: " << (this->GetHealth() <= 0 ? "DEAD" : HPTempString) << ")" << endl;
 
       // Do another check because we can reach 0, but it won't check until next collision.
       if(this->GetHealth() <= 0){

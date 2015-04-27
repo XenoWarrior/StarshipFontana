@@ -22,7 +22,7 @@ using namespace std;
  * enum to mark the type of the SFAsset.  If we add more asset types then
  * the subclassing strategy becomes a better option.
  */
-enum SFASSETTYPE {SFASSET_DEAD, SFASSET_PLAYER, SFASSET_PROJECTILE, SFASSET_ALIEN, SFASSET_COIN, SFASSET_WALL};
+enum SFASSETTYPE {SFASSET_DEAD, SFASSET_PLAYER, SFASSET_PROJECTILE, SFASSET_ALIEN, SFASSET_COIN, SFASSET_WALL, SFASSET_STARS};
 
 class SFAsset {
 public:
@@ -34,10 +34,13 @@ public:
   virtual Point2    GetPosition();
   virtual SFAssetId GetId();
   virtual void      OnRender();
-  virtual void      GoEast();
-  virtual void      GoWest(); 
-  virtual void      GoNorth();
-  virtual void      GoSouth();
+
+  // Now that speed is being passed to this, I could actually pack it into a single method.
+  virtual void      GoEast(float speed);
+  virtual void      GoWest(float speed); 
+  virtual void      GoNorth(float speed);
+  virtual void      GoSouth(float speed);
+  
   virtual void      SetNotAlive();
   virtual bool      IsAlive();
   virtual int       HandleCollision();
@@ -47,8 +50,6 @@ public:
   virtual void      SetHealth(int val);
   virtual int       GetScore();
   virtual void      SetScore(int val);
-  virtual int       GetDiff();
-  virtual void      SetDiff(int val);
   
   virtual bool      CollidesWith(shared_ptr<SFAsset>);;
   virtual shared_ptr<SFBoundingBox> GetBoundingBox();
@@ -65,7 +66,6 @@ private:
 
   int                         objHP;
   int                         playerScore;
-  int                         gameDifficulty = 0;
 
   static int SFASSETID;
 };
