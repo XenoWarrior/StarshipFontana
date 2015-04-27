@@ -255,8 +255,7 @@ void SFAsset::MoveVertical(float speed) {
       bbox->centre = make_shared<Vector2>(c);
     }
     else{
-      cout << "Resetting gb pos." << endl;
-      auto pos  = Point2(320, 1800);
+      auto pos  = Point2(320, 1600);
       this->SetPosition(pos);
     }
   }

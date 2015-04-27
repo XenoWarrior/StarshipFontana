@@ -58,7 +58,7 @@ SFApp::SFApp(std::shared_ptr<SFWindow> window) : fire(0), is_running(true), sf_w
   }
   for(int i = 0; i < 2; i++){
     auto star = make_shared<SFAsset>(SFASSET_STARS, sf_window);
-    auto pos = (i == 0 ? Point2(320, 1000) : Point2(320, 1800));
+    auto pos = (i == 0 ? Point2(320, 1000) : Point2(320, 1600));
     star->SetPosition(pos);
     stars.push_back(star);
   }
