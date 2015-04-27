@@ -299,16 +299,16 @@ void SFAsset::HandleInput(){
   // This section of the code handles keyboard input
   // Used for nice player movement.
   const Uint8 *keyboardState = SDL_GetKeyboardState(NULL);
-  if(keyboardState[SDL_SCANCODE_DOWN]) {
+  if(keyboardState[SDL_SCANCODE_DOWN] || keyboardState[SDL_SCANCODE_S]) {
     this->MoveVertical(-2.0f);
   }
-  if(keyboardState[SDL_SCANCODE_UP]) {
+  if(keyboardState[SDL_SCANCODE_UP] || keyboardState[SDL_SCANCODE_W]) {
     this->MoveVertical(4.0f);
   }
-  if(keyboardState[SDL_SCANCODE_LEFT]) {
+  if(keyboardState[SDL_SCANCODE_LEFT] || keyboardState[SDL_SCANCODE_A]) {
     this->MoveHorizontal(-5.0f);
   }
-  if(keyboardState[SDL_SCANCODE_RIGHT]) {
+  if(keyboardState[SDL_SCANCODE_RIGHT] || keyboardState[SDL_SCANCODE_D]) {
     this->MoveHorizontal(5.0f);
   }
 }

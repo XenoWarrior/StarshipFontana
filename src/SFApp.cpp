@@ -141,7 +141,7 @@ void SFApp::OnEvent(SFEvent& event) {
           fire++;
 
           // Fire a projectile.
-          FireProjectile();
+          FireProjectile(player->GetPosition(), true);
         }
       }
       // Break out of statement.
@@ -217,9 +217,13 @@ void SFApp::OnUpdateWorld() {
   }
 
   // Update projectile positions
-  for(auto p: projectiles) {
+  for(auto pp: pProjectiles) {
     // Move projectile north
-    p->MoveVertical(10.0f);
+    pp->MoveVertical(10.0f);
+  }
+  for(auto ep: eProjectiles) {
+    // Move projectile north
+    ep->MoveVertical(-5.0f - gameDifficulty);
   }
 
   for(auto s : stars){ 
@@ -271,7 +275,7 @@ void SFApp::OnUpdateWorld() {
   }
 
   // Check for collisions on projectiles
-  for(auto p : projectiles) {
+  for(auto p : pProjectiles) {
     // Check through all enemies
     for(auto a : aliens) {
       // If the projectile collides with the alien
@@ -325,14 +329,14 @@ void SFApp::OnUpdateWorld() {
   // Set the alive enemies back into the main array
   aliens = list<shared_ptr<SFAsset>>(alienTemp);
 
-  // Remove all dead projectiles
-  list<shared_ptr<SFAsset>> projTemp;
-  // For each projectiles
-  for(auto p : projectiles) {
+  // Remove all dead (player) projectiles
+  list<shared_ptr<SFAsset>> pProjTemp;
+  // For each projectile
+  for(auto p : pProjectiles) {
     // Check if alive
     if(p->IsAlive()) {
       // Add alive to new temp array
-      projTemp.push_back(p);
+      pProjTemp.push_back(p);
     }
     else{
       // Decrease the counter for total bullets on screen
@@ -340,8 +344,26 @@ void SFApp::OnUpdateWorld() {
     }
   }
   // Clear old bullets and set alive ones back to array
-  projectiles.clear();
-  projectiles = list<shared_ptr<SFAsset>>(projTemp);
+  pProjectiles.clear();
+  pProjectiles = list<shared_ptr<SFAsset>>(pProjTemp);
+
+  // Remove all dead (enemy) projectiles
+  list<shared_ptr<SFAsset>>eProjTemp;
+  // For each projectile
+  for(auto p : eProjectiles) {
+    // Check if alive
+    if(p->IsAlive()) {
+      // Add alive to new temp array
+      eProjTemp.push_back(p);
+    }
+    else{
+      // Decrease the counter for total bullets on screen
+      fire--;
+    }
+  }
+  // Clear old bullets and set alive ones back to array
+  eProjectiles.clear();
+  eProjectiles = list<shared_ptr<SFAsset>>(eProjTemp);
 
   // Remove all dead collectibles
   list<shared_ptr<SFAsset>> collTemp;
@@ -359,6 +381,7 @@ void SFApp::OnUpdateWorld() {
 
   // Clear-out the HPBlock list and update it
   healthBlocks.clear();
+  stage.clear();
   DrawHud();
 
   // Increase the tick counter (used to calculate time played)
@@ -368,7 +391,8 @@ void SFApp::OnUpdateWorld() {
 /***********************************************************
   This will setup any UI related assets to the screen
 
-  It mainly updates the state of the player health for now
+  It mainly updates the state of the player health
+  and the game difficulty indicator (1 to 5)
 ***********************************************************/
 void SFApp::DrawHud(){
   int totalBlocks = player->GetHealth() / 10;
@@ -392,6 +416,14 @@ void SFApp::DrawHud(){
       hpBlock->SetPosition(pos);
       healthBlocks.push_back(hpBlock); 
     }
+  }
+
+  for(int i = 0; i < gameDifficulty; i++){
+    // Since the indicator will use the same sprite, it won't matter to use HEALTHBLOCKG
+    auto stageIndicator = make_shared<SFAsset>(SFASSET_HEALTHBLOCKG, sf_window);
+    auto pos = Point2(20 + (16 * i), 60);
+    stageIndicator->SetPosition(pos);
+    stage.push_back(stageIndicator);
   }
 }
 
@@ -424,7 +456,12 @@ void SFApp::OnRender() {
   player->OnRender();
 
   // Render projectiles that are currently alive
-  for(auto p: projectiles) {
+  for(auto p: pProjectiles) {
+    if(p->IsAlive()) {
+      p->OnRender();
+    }
+  }
+  for(auto p: eProjectiles) {
     if(p->IsAlive()) {
       p->OnRender();
     }
@@ -446,9 +483,13 @@ void SFApp::OnRender() {
   for(auto hp: healthBlocks) {
     hp->OnRender();
   }
-  // Render healthbar
   for(auto bar: healthBar) {
     bar->OnRender();
+  }
+
+  // Just to show what stage we're on
+  for(auto st: stage) {
+    st->OnRender();
   }
 
   // Switch the off-screen buffer to be on-screen
@@ -457,29 +498,21 @@ void SFApp::OnRender() {
 
 /***********************************************************
   This method is exactly what it says... It fires bullets.
-
-  It could be possible to move this method into SFAsset.cpp
-  and have it so any object (within reason) can fire projectiles.
-
-  So it could be similar to:
-    SFAsset->FireProjectile(); to call
-  And:
-    if(SFASSET_ALIEN == type) to check
 ***********************************************************/
-void SFApp::FireProjectile() {
+void SFApp::FireProjectile(Point2 position, bool isPlayer) {
   // Make the projectiles
   auto pb = make_shared<SFAsset>(SFASSET_PROJECTILE, sf_window);
 
-  // Get the player position
-  auto v  = player->GetPosition();
+  // Set the projectile to the position
+  pb->SetPosition(position);
 
-  // Set the projectile to the player pos
-  pb->SetPosition(v);
-
-  // Push back to array
-  projectiles.push_back(pb);
-
-  player->SetScore(player->GetScore() - 1);
+  if(isPlayer){
+    pProjectiles.push_back(pb);
+    player->SetScore(player->GetScore() - 1);
+  }
+  else{
+    eProjectiles.push_back(pb);
+  }
 }
 
 /***********************************************************
@@ -532,8 +565,8 @@ void SFApp::PauseGame(){
   }
 }
 
-void SFApp::GameDifficultyModifier(int diff){
-  cout << "Changing game stage... Stage " << diff << " of 5." << endl << (gameDifficulty < diff ? "The game will get harder!" : "The game will get easier!") << endl;
+void SFApp::GameDifficultyModifier(int diff) {
+  cout << "Changing game stage... Stage " << diff << " of 5." << endl;
   if(gameDifficulty < diff){
     int number_of_aliens;
     if(diff == 1){

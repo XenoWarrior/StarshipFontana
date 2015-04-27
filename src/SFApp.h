@@ -40,7 +40,7 @@ public:
   int     OnExecute();
   void    OnUpdateWorld();
   void    OnRender();
-  void    FireProjectile();
+  void    FireProjectile(Point2 position, bool isPlayer);
   void    EndGame();
   void    PauseGame();
   void    GameDifficultyModifier(int diff);
@@ -60,11 +60,15 @@ private:
   shared_ptr<SFBoundingBox>   app_box;
 
   // The object lists for our game instances
-  list<shared_ptr<SFAsset>> projectiles;
+  list<shared_ptr<SFAsset>> pProjectiles;
+  list<shared_ptr<SFAsset>> eProjectiles;
+
   list<shared_ptr<SFAsset>> aliens;
   list<shared_ptr<SFAsset>> coins;
-  list<shared_ptr<SFAsset>> walls;
   list<shared_ptr<SFAsset>> stars;
+
+  list<shared_ptr<SFAsset>> stage;
+
   list<shared_ptr<SFAsset>> healthBlocks;
   list<shared_ptr<SFAsset>> healthBar;
 
