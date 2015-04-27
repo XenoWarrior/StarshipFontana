@@ -34,13 +34,8 @@ public:
   virtual Point2    GetPosition();
   virtual SFAssetId GetId();
   virtual void      OnRender();
-
-  // Now that speed is being passed to this, I could actually pack it into a single method.
-  virtual void      GoEast(float speed);
-  virtual void      GoWest(float speed); 
-  virtual void      GoNorth(float speed);
-  virtual void      GoSouth(float speed);
-  
+  virtual void      MoveHorizontal(float speed);
+  virtual void      MoveVertical(float speed);
   virtual void      SetNotAlive();
   virtual bool      IsAlive();
   virtual int       HandleCollision();

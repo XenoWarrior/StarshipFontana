@@ -213,17 +213,17 @@ void SFApp::OnUpdateWorld() {
   // Update projectile positions
   for(auto p: projectiles) {
     // Move projectile north
-    p->GoNorth(10.0f);
+    p->MoveVertical(10.0f);
   }
 
   for(auto s : stars){ 
-    s->GoSouth(-0.5f - (gameDifficulty / 2));
+    s->MoveVertical(-0.5f - (gameDifficulty / 2));
   }
 
   // Update collectible positions and check collisions
   for(auto c : coins) {
     // Move collectible coin south
-		c->GoSouth(-1.0f);
+		c->MoveVertical(-1.0f);
 
     // Check player collision with coin
     if(player->CollidesWith(c)) {
@@ -244,7 +244,7 @@ void SFApp::OnUpdateWorld() {
   // Update enemy positions and check player collisions
   for(auto a : aliens) {
     // Move the enemy south
-    a->GoSouth(-2.0f - gameDifficulty);
+    a->MoveVertical(-2.0f - gameDifficulty);
 
     // Check if player collides with enemy
     if(player->CollidesWith(a)) {
@@ -489,7 +489,7 @@ void SFApp::PauseGame(){
 }
 
 void SFApp::GameDifficultyModifier(int diff){
-  cout << "Changing game stage... Stage " << diff << " of 5." << endl << (gameDifficulty > diff ? "The game will get harder!" : "The game will get easier!") << endl;
+  cout << "Changing game stage... Stage " << diff << " of 5." << endl << (gameDifficulty < diff ? "The game will get harder!" : "The game will get easier!") << endl;
   if(gameDifficulty < diff){
     int number_of_aliens;
     if(diff == 1){

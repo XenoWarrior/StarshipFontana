@@ -171,37 +171,21 @@ void SFAsset::OnRender() {
   Makes the objects move
 
   To reduce amount of code needed, you can just do:
-    obj->GoWest();
+    obj->MoveHorizontal();
 
-  Then in the GoWest() method, define a new SFAsset so each
+  Then in the MoveHorizontal() method, define a new SFAsset so each
   different assets have individual movement patterns rather than
   making a new method to handle movement for other assets.
 
   This is the same for all below methods:
-    GoWest();
-    GoEast();
-    GoNorth();
-    GoSouth();
+    MoveHorizontal();
+    MoveVertical();
 
   Each movement is similar, but they're all set to different
   speeds in Vector2
   (Vector2(XMove, YMove))
 *********************************************************/
-void SFAsset::GoWest(float speed) {
-  // Checks if the asset player is the type in this call
-	if(SFASSET_PLAYER == type) {
-    // Setup our new vector
-	  Vector2 c = *(bbox->centre) + Vector2(speed, 0.0f);
-
-    // If not at the left of screen, allow it to move
-	  if(!(c.getX()-32.0f < 0)) {
-	    bbox->centre.reset();
-	    bbox->centre = make_shared<Vector2>(c);
-	  }
-	}
-}
-
-void SFAsset::GoEast(float speed) {
+void SFAsset::MoveHorizontal(float speed) {
   // For this to stop instances going off-screen
   // need to get height and width of screen
 	int w, h;
@@ -213,46 +197,32 @@ void SFAsset::GoEast(float speed) {
 		Vector2 c = *(bbox->centre) + Vector2(speed, 0.0f);
 
     // If not at the left of screen, allow it to move
-		if(!(c.getX()+32.0f > w)) {
+		if(!(c.getX()+32.0f > w) && !(c.getX()-32.0f < 0)) {
 		  bbox->centre.reset();
 		  bbox->centre = make_shared<Vector2>(c);
 		}
 	}
-
-  // Handle for type wall (only for current testing based on new idea)
-  if(SFASSET_WALL == type) {
-    Vector2 c = *(bbox->centre) + Vector2(speed, 0.0f);
-
-    // If not at the left of screen: allow it to move, else: reset position.
-    if(!(c.getX()-32.0f > w)) {
-      bbox->centre.reset();
-      bbox->centre = make_shared<Vector2>(c);
-    }
-    else {
-      auto pos  = Point2(rand() % -1000 + -400, rand() % 100 + 400);
-      this->SetPosition(pos);
-    }
-  }
 }
 
-void SFAsset::GoNorth(float speed) {
-	int w, h;
-	SDL_GetRendererOutputSize(sf_window->getRenderer(), &w, &h);
+void SFAsset::MoveVertical(float speed) {
+  // For this to stop instances going off-screen
+  // need to get height and width of screen
+  int w, h;
+  SDL_GetRendererOutputSize(sf_window->getRenderer(), &w, &h);
 
   // Handle movement for type player
-  if(SFASSET_PLAYER == type) {
-
+	if(SFASSET_PLAYER == type) {
 		Vector2 c = *(bbox->centre) + Vector2(0.0f, speed);
 
-		if(!(c.getY()-18.0f > h)) {
+		if(!(c.getY() < 64.0f) && !(c.getY()-18.0f > h)) {
 		  bbox->centre.reset();
 		  bbox->centre = make_shared<Vector2>(c);
 		}
 	}
 
   // Handle movement for type projectile
-	if(SFASSET_PROJECTILE == type){
-	  Vector2 c = *(bbox->centre) + Vector2(0.0f, speed);
+  if(SFASSET_PROJECTILE == type){
+    Vector2 c = *(bbox->centre) + Vector2(0.0f, speed);
     if(!(c.getY() > h + 32.0f)) {
       bbox->centre.reset();
       bbox->centre = make_shared<Vector2>(c);
@@ -260,19 +230,7 @@ void SFAsset::GoNorth(float speed) {
     else {
       this->SetNotAlive();
     }
-	}
-}
-
-void SFAsset::GoSouth(float speed) {
-  // Handle movement for type player
-	if(SFASSET_PLAYER == type) {
-		Vector2 c = *(bbox->centre) + Vector2(0.0f, speed);
-
-		if(!(c.getY() < 64.0f)) {
-		  bbox->centre.reset();
-		  bbox->centre = make_shared<Vector2>(c);
-		}
-	}
+  }
 
   // Handle movement for type coin
   if(SFASSET_COIN == type) {
@@ -338,16 +296,16 @@ void SFAsset::HandleInput(){
   // Used for nice player movement.
   const Uint8 *keyboardState = SDL_GetKeyboardState(NULL);
   if(keyboardState[SDL_SCANCODE_DOWN]) {
-    this->GoSouth(-2.0f);
+    this->MoveVertical(-2.0f);
   }
   if(keyboardState[SDL_SCANCODE_UP]) {
-    this->GoNorth(4.0f);
+    this->MoveVertical(4.0f);
   }
   if(keyboardState[SDL_SCANCODE_LEFT]) {
-    this->GoWest(-5.0f);
+    this->MoveHorizontal(-5.0f);
   }
   if(keyboardState[SDL_SCANCODE_RIGHT]) {
-    this->GoEast(5.0f);
+    this->MoveHorizontal(5.0f);
   }
 }
 
