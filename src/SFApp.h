@@ -44,6 +44,8 @@ public:
   void    EndGame();
   void    PauseGame();
   void    GameDifficultyModifier(int diff);
+  void    DrawHud();
+
 private:
   // Define any variables to use in SFApp.cpp below.
   SDL_Surface             * surface;
@@ -63,6 +65,8 @@ private:
   list<shared_ptr<SFAsset>> coins;
   list<shared_ptr<SFAsset>> walls;
   list<shared_ptr<SFAsset>> stars;
+  list<shared_ptr<SFAsset>> healthBlocks;
+  list<shared_ptr<SFAsset>> healthBar;
 
   // For projectile handling
   int fire;                   // Total fired

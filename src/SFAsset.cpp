@@ -50,6 +50,18 @@ SFAsset::SFAsset(SFASSETTYPE type, std::shared_ptr<SFWindow> window): type(type)
     case SFASSET_STARS: 
       sprite = IMG_LoadTexture(sf_window->getRenderer(), "assets/stars.png");
       break;
+    case SFASSET_HEALTHBAR:
+      sprite = IMG_LoadTexture(sf_window->getRenderer(), "assets/healthbar.png");
+      break;
+    case SFASSET_HEALTHBLOCKG:
+      sprite = IMG_LoadTexture(sf_window->getRenderer(), "assets/healthblockgreen.png");
+      break;
+    case SFASSET_HEALTHBLOCKY:
+      sprite = IMG_LoadTexture(sf_window->getRenderer(), "assets/healthblockyellow.png");
+      break;
+    case SFASSET_HEALTHBLOCKR:
+      sprite = IMG_LoadTexture(sf_window->getRenderer(), "assets/healthblockred.png");
+      break;
   }
 
   // If the sprite was not set, then throw an error as it may not exist

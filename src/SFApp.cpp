@@ -56,12 +56,18 @@ SFApp::SFApp(std::shared_ptr<SFWindow> window) : fire(0), is_running(true), sf_w
     coin->SetPosition(pos);
     coins.push_back(coin);
   }
+
   for(int i = 0; i < 2; i++){
     auto star = make_shared<SFAsset>(SFASSET_STARS, sf_window);
     auto pos = (i == 0 ? Point2(320, 1000) : Point2(320, 1600));
     star->SetPosition(pos);
     stars.push_back(star);
   }
+
+  auto hpBar = make_shared<SFAsset>(SFASSET_HEALTHBAR, sf_window);
+  auto pos = Point2(92, 488);
+  hpBar->SetPosition(pos);
+  healthBar.push_back(hpBar);
 
   cout << endl << "Welcome to the game, you have " << player->GetHealth() << " HP." << endl;
   cout << "You start with " << player->GetScore() << " points, use these points wisely as each bullet will use 1 point." << endl;
@@ -351,8 +357,42 @@ void SFApp::OnUpdateWorld() {
   coins.clear();
   coins = list<shared_ptr<SFAsset>>(collTemp);
 
+  // Clear-out the HPBlock list and update it
+  healthBlocks.clear();
+  DrawHud();
+
   // Increase the tick counter (used to calculate time played)
   currTick++;
+}
+
+/***********************************************************
+  This will setup any UI related assets to the screen
+
+  It mainly updates the state of the player health for now
+***********************************************************/
+void SFApp::DrawHud(){
+  int totalBlocks = player->GetHealth() / 10;
+
+  for(int i = 0; i < totalBlocks; i++) {
+    if(player->GetHealth() >= 70) {
+      auto hpBlock = make_shared<SFAsset>(SFASSET_HEALTHBLOCKG, sf_window);
+      auto pos = Point2(20 + (16 * i), 450);
+      hpBlock->SetPosition(pos);
+      healthBlocks.push_back(hpBlock);
+    }
+    else if(player->GetHealth() >= 30) {
+      auto hpBlock = make_shared<SFAsset>(SFASSET_HEALTHBLOCKY, sf_window);
+      auto pos = Point2(20 + (16 * i), 450);
+      hpBlock->SetPosition(pos);
+      healthBlocks.push_back(hpBlock);
+    }
+    else {
+      auto hpBlock = make_shared<SFAsset>(SFASSET_HEALTHBLOCKR, sf_window);
+      auto pos = Point2(20 + (16 * i), 450);
+      hpBlock->SetPosition(pos);
+      healthBlocks.push_back(hpBlock); 
+    }
+  }
 }
 
 /***********************************************************
@@ -375,7 +415,7 @@ void SFApp::OnUpdateWorld() {
 void SFApp::OnRender() {
   SDL_RenderClear(sf_window->getRenderer());
 
-  // Render walls that are currently alive
+  // Render backgrounds
   for(auto s: stars) {
     s->OnRender();
   }
@@ -402,9 +442,13 @@ void SFApp::OnRender() {
     c->OnRender();
   }
 
-  // Render walls that are currently alive
-  for(auto w: walls) {
-    w->OnRender();
+  // Render healthbar
+  for(auto hp: healthBlocks) {
+    hp->OnRender();
+  }
+  // Render healthbar
+  for(auto bar: healthBar) {
+    bar->OnRender();
   }
 
   // Switch the off-screen buffer to be on-screen
