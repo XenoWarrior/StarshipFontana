@@ -22,7 +22,7 @@ using namespace std;
  * enum to mark the type of the SFAsset.  If we add more asset types then
  * the subclassing strategy becomes a better option.
  */
-enum SFASSETTYPE {SFASSET_DEAD, SFASSET_PLAYER, SFASSET_PROJECTILE, SFASSET_ALIEN, SFASSET_COIN, SFASSET_STARS, SFASSET_HEALTHBAR, SFASSET_HEALTHBLOCKG, SFASSET_HEALTHBLOCKY, SFASSET_HEALTHBLOCKR};
+enum SFASSETTYPE {SFASSET_DEAD, SFASSET_PLAYER, SFASSET_PROJECTILE, SFASSET_EPROJECTILE, SFASSET_ALIEN, SFASSET_COIN, SFASSET_POWERUP, SFASSET_STARS, SFASSET_HEALTHBAR, SFASSET_HEALTHBLOCKG, SFASSET_HEALTHBLOCKY, SFASSET_HEALTHBLOCKR};
 
 class SFAsset {
 public:
@@ -45,6 +45,9 @@ public:
   virtual void      SetHealth(int val);
   virtual int       GetScore();
   virtual void      SetScore(int val);
+  virtual bool      HandleProjectile();
+  virtual int       GetFired();
+  virtual void      SetFired(int val);
   
   virtual bool      CollidesWith(shared_ptr<SFAsset>);;
   virtual shared_ptr<SFBoundingBox> GetBoundingBox();
@@ -61,6 +64,8 @@ private:
 
   int                         objHP;
   int                         playerScore;
+
+  int                         totFired;
 
   static int SFASSETID;
 };

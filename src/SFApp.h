@@ -65,6 +65,7 @@ private:
 
   list<shared_ptr<SFAsset>> aliens;
   list<shared_ptr<SFAsset>> coins;
+  list<shared_ptr<SFAsset>> powers;
   list<shared_ptr<SFAsset>> stars;
 
   list<shared_ptr<SFAsset>> stage;
@@ -76,6 +77,8 @@ private:
   int fire;                   // Total fired
   int maxProjectiles = 5;     // Max allowed
   int totalProjectiles = 0;   // Total in session
+  int firePower = 0;          // Firepower of player
+  int firePowerTime = 0;    // Time that the powerup lasts in MS
 
   // For calculating time
   int currTick = 0;

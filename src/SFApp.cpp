@@ -42,7 +42,8 @@ SFApp::SFApp(std::shared_ptr<SFWindow> window) : fire(0), is_running(true), sf_w
 
     // Make enemy at position and set it's health
     alien->SetPosition(pos);
-    alien->SetHealth(10);
+    alien->SetHealth(15);
+    alien->SetFired(0);
 
     aliens.push_back(alien);
 
@@ -230,6 +231,25 @@ void SFApp::OnUpdateWorld() {
     s->MoveVertical(-0.5f - (gameDifficulty / 2));
   }
 
+  for(auto power: powers){
+    power->MoveVertical(-3.0f);
+
+    if(player->CollidesWith(power)){
+      firePower = 1;
+      firePowerTime = 300;
+      power->HandleCollision();
+    }
+  }
+
+  if(firePower == 1){
+    if(firePowerTime > 1){
+      firePowerTime--;
+    }
+    else{
+      firePower = 0;
+    }
+  }
+
   // Update collectible positions and check collisions
   for(auto c : coins) {
     // Move collectible coin south
@@ -255,6 +275,11 @@ void SFApp::OnUpdateWorld() {
   for(auto a : aliens) {
     // Move the enemy south
     a->MoveVertical(-2.0f - gameDifficulty);
+
+    if(a->HandleProjectile()){
+      FireProjectile(a->GetPosition(), false);
+      cout << "Enemy fired projectile" << endl;
+    }
 
     // Check if player collides with enemy
     if(player->CollidesWith(a)) {
@@ -299,15 +324,24 @@ void SFApp::OnUpdateWorld() {
 
           // Decide if a collectible should be dropped
           int check = (rand() % 600 + 32);
-          if(check >= 200 && check <= 400){
+          if(check >= 0 && check <= 200){
             // Output some message
-            cout << "Power up dropped!" << endl;
+            cout << "Coin dropped!" << endl;
 
             // Drop some loot
             auto coin = make_shared<SFAsset>(SFASSET_COIN, sf_window);
             auto pos  = Point2(aPos);
             coin->SetPosition(pos);
             coins.push_back(coin);
+          }
+          else if(check >= 200 && check <= 300) {
+            cout << "Powerup dropped!" << endl;
+
+            // Drop some loot
+            auto power = make_shared<SFAsset>(SFASSET_POWERUP, sf_window);
+            auto pos  = Point2(aPos);
+            power->SetPosition(pos);
+            powers.push_back(power);
           }
         }
       }
@@ -378,6 +412,21 @@ void SFApp::OnUpdateWorld() {
   // Clear old coins and set alive ones back to array
   coins.clear();
   coins = list<shared_ptr<SFAsset>>(collTemp);
+
+
+  // Remove all dead powerups
+  list<shared_ptr<SFAsset>> powTemp;
+  // For each powerup
+  for(auto power : powers) {
+    // Check if alive
+    if(power->IsAlive()) {
+      // Add alive to new temp array
+      powTemp.push_back(power);
+    }
+  }
+  // Clear old powerups and set alive ones back to array
+  powers.clear();
+  powers = list<shared_ptr<SFAsset>>(powTemp);
 
   // Clear-out the HPBlock list and update it
   healthBlocks.clear();
@@ -467,6 +516,12 @@ void SFApp::OnRender() {
     }
   }
 
+  for(auto power: powers) {
+    if(power->IsAlive()) {
+      power->OnRender();
+    }
+  }
+
   // Render aliens that are currently alive
   for(auto a: aliens) {
     if(a->IsAlive()) {
@@ -500,17 +555,41 @@ void SFApp::OnRender() {
   This method is exactly what it says... It fires bullets.
 ***********************************************************/
 void SFApp::FireProjectile(Point2 position, bool isPlayer) {
-  // Make the projectiles
-  auto pb = make_shared<SFAsset>(SFASSET_PROJECTILE, sf_window);
-
-  // Set the projectile to the position
-  pb->SetPosition(position);
-
   if(isPlayer){
-    pProjectiles.push_back(pb);
+
+    if(firePower == 1){
+      // Make the projectiles
+      auto p1 = make_shared<SFAsset>(SFASSET_PROJECTILE, sf_window);
+      auto p2 = make_shared<SFAsset>(SFASSET_PROJECTILE, sf_window);
+
+      int baseX = position.getX()-12;
+      int baseY = position.getY();
+
+      auto pos1 = Point2(baseX, baseY);
+      auto pos2 = Point2(baseX+24, baseY);
+
+      // Set the projectile to the position
+      p1->SetPosition(pos1);
+      p2->SetPosition(pos2);
+      pProjectiles.push_back(p1);
+      pProjectiles.push_back(p2);
+    }
+    else{
+      // Make the projectiles
+      auto pb = make_shared<SFAsset>(SFASSET_PROJECTILE, sf_window);
+
+      // Set the projectile to the position
+      pb->SetPosition(position);
+      pProjectiles.push_back(pb);
+    }
     player->SetScore(player->GetScore() - 1);
   }
   else{
+      // Make the projectiles
+      auto pb = make_shared<SFAsset>(SFASSET_PROJECTILE, sf_window);
+
+      // Set the projectile to the position
+      pb->SetPosition(position);
     eProjectiles.push_back(pb);
   }
 }
@@ -591,7 +670,8 @@ void SFApp::GameDifficultyModifier(int diff) {
 
       // Make enemy at position and set it's health
       alien->SetPosition(pos);
-      alien->SetHealth(10);
+      alien->SetHealth(15);
+      alien->SetFired(0);
 
       aliens.push_back(alien);
 

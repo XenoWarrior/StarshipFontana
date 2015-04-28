@@ -62,6 +62,9 @@ SFAsset::SFAsset(SFASSETTYPE type, std::shared_ptr<SFWindow> window): type(type)
     case SFASSET_HEALTHBLOCKR:
       sprite = IMG_LoadTexture(sf_window->getRenderer(), "assets/healthblockred.png");
       break;
+    case SFASSET_POWERUP:
+      sprite = IMG_LoadTexture(sf_window->getRenderer(), "assets/projectile.png");
+      break;
   }
 
   // If the sprite was not set, then throw an error as it may not exist
@@ -133,14 +136,29 @@ SFAssetId SFAsset::GetId() {
   Will get the object health points
 *********************************************************/
 int SFAsset::GetHealth() {
-  return objHP;
+  return this->objHP;
 }
+
 
 /*********************************************************
   Will set the object health points
 *********************************************************/
 void SFAsset::SetHealth(int val) {
-  this->objHP = val;
+  objHP = val;
+}
+
+/*********************************************************
+  Will get the projectiles fored
+*********************************************************/
+int SFAsset::GetFired() {
+  return this->totFired;
+}
+
+/*********************************************************
+  Will set the object health points
+*********************************************************/
+void SFAsset::SetFired(int val) {
+  totFired = val;
 }
 
 /*********************************************************
@@ -241,6 +259,30 @@ void SFAsset::MoveVertical(float speed) {
     }
   }
 
+  // Handle movement for type powerup
+  if(SFASSET_POWERUP == type){
+    Vector2 c = *(bbox->centre) + Vector2(0.0f, speed);
+    if(!(c.getY() > h + 32.0f)) {
+      bbox->centre.reset();
+      bbox->centre = make_shared<Vector2>(c);
+    }
+    else {
+      this->SetNotAlive();
+    }
+  }
+
+  // Handle movement for type projectile
+  if(SFASSET_EPROJECTILE == type){
+    Vector2 c = *(bbox->centre) + Vector2(0.0f, speed);
+    if(!(c.getY() > h + 32.0f)) {
+      bbox->centre.reset();
+      bbox->centre = make_shared<Vector2>(c);
+    }
+    else {
+      this->SetNotAlive();
+    }
+  }
+
   // Handle movement for type coin
   if(SFASSET_COIN == type) {
     Vector2 c = *(bbox->centre) + Vector2(0.0f, speed);
@@ -273,16 +315,16 @@ void SFAsset::MoveVertical(float speed) {
 	if(SFASSET_ALIEN == type) {     
 		Vector2 c = *(bbox->centre) + Vector2(0.0f, speed);
 
-		if(!(c.getY() < 0.0f)) {
+  if(!(c.getY() < 0.0f)) {
 			bbox->centre.reset();
 			bbox->centre = make_shared<Vector2>(c);
 		}
 		else{
-    	auto pos  = Point2(rand() % 600 + 32, rand() % 400 + 600);
+      auto pos  = Point2(rand() % 600 + 32, rand() % 400 + 600);
       this->SetPosition(pos);
       this->SetHealth(10);
-		}
-	}
+    }
+  } 
 }
 
 /*********************************************************
@@ -340,10 +382,25 @@ void SFAsset::HandlePlayerCollision(){
   }
 }
 
+// Decides if enemies can fire projectiles
+bool SFAsset::HandleProjectile(){
+  int val = (rand() % 200 + 600);
+  // Check total fired and decide randomly if the enemy can fire again
+  if(this->GetFired() < 1 && val > 300 && val < 400){
+    this->SetFired(this->GetFired() + 1);
+    return true;
+  }
+}
+
 // Handing object collisions
 int SFAsset::HandleCollision() {
 	// Collisions for projectiles
   if(SFASSET_PROJECTILE == type) {
+    SetNotAlive();
+  }
+
+  // Handle collision for the powerup
+  if(SFASSET_POWERUP == type) {
     SetNotAlive();
   }
 
@@ -384,7 +441,7 @@ int SFAsset::HandleCollision() {
       // Enemy died, so set new position and health
       auto pos  = Point2(rand() % 600 + 32, rand() % 400 + 600);
       this->SetPosition(pos);
-      this->SetHealth(10);
+      this->SetHealth(15);
 
       // Tell player
       cout << "Enemy " << this->GetId() << " died!" << endl;
@@ -398,7 +455,6 @@ int SFAsset::HandleCollision() {
 	if(SFASSET_COIN == type) {
     // Kill the coin
     this->SetNotAlive();
-    return 1;
 	}
   return 0;
 }
