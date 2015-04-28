@@ -313,16 +313,16 @@ void SFAsset::MoveVertical(float speed) {
 
   // Handle movement for type alien
 	if(SFASSET_ALIEN == type) {     
-		Vector2 c = *(bbox->centre) + Vector2(0.0f, speed);
+    Vector2 c = *(bbox->centre) + Vector2(0.0f, speed);
 
-  if(!(c.getY() < 0.0f)) {
-			bbox->centre.reset();
-			bbox->centre = make_shared<Vector2>(c);
-		}
-		else{
+    if(!(c.getY() < 0.0f)) {
+      bbox->centre.reset();
+        bbox->centre = make_shared<Vector2>(c);
+      }
+    else{
       auto pos  = Point2(rand() % 600 + 32, rand() % 400 + 600);
       this->SetPosition(pos);
-      this->SetHealth(10);
+      this->SetHealth(15);
     }
   } 
 }
