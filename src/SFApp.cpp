@@ -32,7 +32,7 @@ SFApp::SFApp(std::shared_ptr<SFWindow> window) : fire(0), is_running(true), sf_w
   auto player_pos = Point2(canvas_w / 2.0f, 88.0f);
   player->SetPosition(player_pos);
   player->SetHealth(100);
-  player->SetScore(1200);
+  player->SetScore(10);
 
   const int number_of_aliens = 10;
   for(int i = 0; i < number_of_aliens; i++) {

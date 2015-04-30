@@ -215,20 +215,20 @@ void SFAsset::OnRender() {
 void SFAsset::MoveHorizontal(float speed) {
   // For this to stop instances going off-screen
   // need to get height and width of screen
-	int w, h;
-	SDL_GetRendererOutputSize(sf_window->getRenderer(), &w, &h);
+  int w, h;
+  SDL_GetRendererOutputSize(sf_window->getRenderer(), &w, &h);
 
   // Handle movement for type player
   if(SFASSET_PLAYER == type) {
     // Setup our new vector
-		Vector2 c = *(bbox->centre) + Vector2(speed, 0.0f);
+    Vector2 c = *(bbox->centre) + Vector2(speed, 0.0f);
 
     // If not at the left of screen, allow it to move
-		if(!(c.getX()+32.0f > w) && !(c.getX()-32.0f < 0)) {
-		  bbox->centre.reset();
-		  bbox->centre = make_shared<Vector2>(c);
-		}
-	}
+    if(!(c.getX()+32.0f > w) && !(c.getX()-32.0f < 0)) {
+      bbox->centre.reset();
+      bbox->centre = make_shared<Vector2>(c);
+    }
+  }
 }
 
 void SFAsset::MoveVertical(float speed) {
@@ -238,14 +238,14 @@ void SFAsset::MoveVertical(float speed) {
   SDL_GetRendererOutputSize(sf_window->getRenderer(), &w, &h);
 
   // Handle movement for type player
-	if(SFASSET_PLAYER == type) {
-		Vector2 c = *(bbox->centre) + Vector2(0.0f, speed);
+  if(SFASSET_PLAYER == type) {
+    Vector2 c = *(bbox->centre) + Vector2(0.0f, speed);
 
-		if(!(c.getY() < 64.0f) && !(c.getY()-18.0f > h)) {
-		  bbox->centre.reset();
-		  bbox->centre = make_shared<Vector2>(c);
-		}
-	}
+    if(!(c.getY() < 64.0f) && !(c.getY()-18.0f > h)) {
+    bbox->centre.reset();
+    bbox->centre = make_shared<Vector2>(c);
+    }
+  }
 	
   // Handle movement for type projectile
   if(SFASSET_PROJECTILE == type){
@@ -312,7 +312,7 @@ void SFAsset::MoveVertical(float speed) {
   }
 
   // Handle movement for type alien
-	if(SFASSET_ALIEN == type) {     
+  if(SFASSET_ALIEN == type) {     
     Vector2 c = *(bbox->centre) + Vector2(0.0f, speed);
 
     if(!(c.getY() < 0.0f)) {
@@ -338,21 +338,21 @@ void SFAsset::HandleInput(){
   int w, h;
   SDL_GetRendererOutputSize(sf_window->getRenderer(), &w, &h);
 
-	// This section of the code handles keyboard input
-	// Used for nice player movement.
-	const Uint8 *keyboardState = SDL_GetKeyboardState(NULL);
-	if(keyboardState[SDL_SCANCODE_DOWN] || keyboardState[SDL_SCANCODE_S]) {
-	  this->MoveVertical(-2.0f);
-	}
-	if(keyboardState[SDL_SCANCODE_UP] || keyboardState[SDL_SCANCODE_W]) {
-	  this->MoveVertical(4.0f);
-	}
-	if(keyboardState[SDL_SCANCODE_LEFT] || keyboardState[SDL_SCANCODE_A]) {
-	  this->MoveHorizontal(-5.0f);
-	}
-	if(keyboardState[SDL_SCANCODE_RIGHT] || keyboardState[SDL_SCANCODE_D]) {
-	  this->MoveHorizontal(5.0f);
-	}
+  // This section of the code handles keyboard input
+  // Used for nice player movement.
+  const Uint8 *keyboardState = SDL_GetKeyboardState(NULL);
+  if(keyboardState[SDL_SCANCODE_DOWN] || keyboardState[SDL_SCANCODE_S]) {
+    this->MoveVertical(-2.0f);
+  }
+  if(keyboardState[SDL_SCANCODE_UP] || keyboardState[SDL_SCANCODE_W]) {
+    this->MoveVertical(4.0f);
+  }
+  if(keyboardState[SDL_SCANCODE_LEFT] || keyboardState[SDL_SCANCODE_A]) {
+    this->MoveHorizontal(-5.0f);
+  }
+  if(keyboardState[SDL_SCANCODE_RIGHT] || keyboardState[SDL_SCANCODE_D]) {
+    this->MoveHorizontal(5.0f);
+  }
 }
 
 // Collision detection
@@ -394,7 +394,7 @@ bool SFAsset::HandleProjectile(){
 
 // Handing object collisions
 int SFAsset::HandleCollision() {
-	// Collisions for projectiles
+  // Collisions for projectiles
   if(SFASSET_PROJECTILE == type) {
     SetNotAlive();
   }
@@ -451,10 +451,10 @@ int SFAsset::HandleCollision() {
     }
   }
 
-	// Collisions for coins
-	if(SFASSET_COIN == type) {
-		// Kill the coin
-		this->SetNotAlive();
-	}
-	return 0;
+  // Collisions for coins
+  if(SFASSET_COIN == type) {
+    // Kill the coin
+    this->SetNotAlive();
+  }
+  return 0;
 }
