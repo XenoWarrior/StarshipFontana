@@ -246,7 +246,7 @@ void SFAsset::MoveVertical(float speed) {
 		  bbox->centre = make_shared<Vector2>(c);
 		}
 	}
-
+	
   // Handle movement for type projectile
   if(SFASSET_PROJECTILE == type){
     Vector2 c = *(bbox->centre) + Vector2(0.0f, speed);
@@ -338,21 +338,21 @@ void SFAsset::HandleInput(){
   int w, h;
   SDL_GetRendererOutputSize(sf_window->getRenderer(), &w, &h);
 
-  // This section of the code handles keyboard input
-  // Used for nice player movement.
-  const Uint8 *keyboardState = SDL_GetKeyboardState(NULL);
-  if(keyboardState[SDL_SCANCODE_DOWN] || keyboardState[SDL_SCANCODE_S]) {
-    this->MoveVertical(-2.0f);
-  }
-  if(keyboardState[SDL_SCANCODE_UP] || keyboardState[SDL_SCANCODE_W]) {
-    this->MoveVertical(4.0f);
-  }
-  if(keyboardState[SDL_SCANCODE_LEFT] || keyboardState[SDL_SCANCODE_A]) {
-    this->MoveHorizontal(-5.0f);
-  }
-  if(keyboardState[SDL_SCANCODE_RIGHT] || keyboardState[SDL_SCANCODE_D]) {
-    this->MoveHorizontal(5.0f);
-  }
+	// This section of the code handles keyboard input
+	// Used for nice player movement.
+	const Uint8 *keyboardState = SDL_GetKeyboardState(NULL);
+	if(keyboardState[SDL_SCANCODE_DOWN] || keyboardState[SDL_SCANCODE_S]) {
+	  this->MoveVertical(-2.0f);
+	}
+	if(keyboardState[SDL_SCANCODE_UP] || keyboardState[SDL_SCANCODE_W]) {
+	  this->MoveVertical(4.0f);
+	}
+	if(keyboardState[SDL_SCANCODE_LEFT] || keyboardState[SDL_SCANCODE_A]) {
+	  this->MoveHorizontal(-5.0f);
+	}
+	if(keyboardState[SDL_SCANCODE_RIGHT] || keyboardState[SDL_SCANCODE_D]) {
+	  this->MoveHorizontal(5.0f);
+	}
 }
 
 // Collision detection
@@ -453,8 +453,8 @@ int SFAsset::HandleCollision() {
 
 	// Collisions for coins
 	if(SFASSET_COIN == type) {
-    // Kill the coin
-    this->SetNotAlive();
+		// Kill the coin
+		this->SetNotAlive();
 	}
-  return 0;
+	return 0;
 }

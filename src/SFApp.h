@@ -73,6 +73,7 @@ private:
   list<shared_ptr<SFAsset>> healthBlocks;
   list<shared_ptr<SFAsset>> healthBar;
 
+
   // For projectile handling
   int fire;                   // Total fired
   int maxProjectiles = 5;     // Max allowed

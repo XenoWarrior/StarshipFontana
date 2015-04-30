@@ -32,7 +32,7 @@ SFApp::SFApp(std::shared_ptr<SFWindow> window) : fire(0), is_running(true), sf_w
   auto player_pos = Point2(canvas_w / 2.0f, 88.0f);
   player->SetPosition(player_pos);
   player->SetHealth(100);
-  player->SetScore(10);
+  player->SetScore(1200);
 
   const int number_of_aliens = 10;
   for(int i = 0; i < number_of_aliens; i++) {
@@ -53,8 +53,7 @@ SFApp::SFApp(std::shared_ptr<SFWindow> window) : fire(0), is_running(true), sf_w
   for(int i = 0; i < 2; i++) {
     // Spawn in coins
     auto coin = make_shared<SFAsset>(SFASSET_COIN, sf_window);
-    auto pos  = Point2(rand() % 600 + 32, rand() % 400 + 600);
-    coin->SetPosition(pos);
+    auto pos  = Point2(rand() % 600 + 32, rand() % 400 + 600); 
     coins.push_back(coin);
   }
 
@@ -73,7 +72,7 @@ SFApp::SFApp(std::shared_ptr<SFWindow> window) : fire(0), is_running(true), sf_w
   cout << endl << "Welcome to the game, you have " << player->GetHealth() << " HP." << endl;
   cout << "You start with " << player->GetScore() << " points, use these points wisely as each bullet will use 1 point." << endl;
   cout << "Hitting enemy will give you back the point, killing will give you 10 points." << endl << "Running out of points or death is game over!" << endl << endl;
-  cout << endl << "Reach stage 5 to encounter the bad guy, b'Kuhn to save Earth's code!" << endl;
+  cout << endl << "Collect 1500 points to win the game!" << endl;
 }
 
 SFApp::~SFApp() {
@@ -101,7 +100,7 @@ void SFApp::OnEvent(SFEvent& event) {
 
   // Now check what event we're processing.
   switch(the_event) {
-    // This is the update event returned from SFEvent::GetCode();
+    // This is the update event returned from Point2(rand() % 600 + 32, rand() % 400 + 600);SFEvent::GetCode();
     case SFEVENT_UPDATE: {
       // Update world and renderer.
       
@@ -152,7 +151,10 @@ void SFApp::OnEvent(SFEvent& event) {
   }
 }
 
-/***********************************************************
+/*********************************
+    ec->OnRender();
+  }
+**************************
   This is called to keep the program running.
 
   It simply sends out our events into the core of the game
@@ -187,8 +189,7 @@ void SFApp::OnUpdateWorld() {
   int w, h;
   SDL_GetRendererOutputSize(sf_window->getRenderer(), &w, &h);
 
-  // Run the new movement handler for our player
-  player->HandleInput();
+	player->HandleInput();
 
   // Handle game-over conditions
   if(player->GetHealth() <= 0 || player->GetScore() <= 0){
@@ -199,6 +200,7 @@ void SFApp::OnUpdateWorld() {
 
   if(player->GetScore() > 1200 && gameDifficulty != 5) {
     gameDifficulty = 5;
+    GameDifficultyModifier(gameDifficulty);
   }
   if(player->GetScore() > 1000 && player->GetScore() < 1200 && gameDifficulty != 4) {
     gameDifficulty = 4;
@@ -216,6 +218,11 @@ void SFApp::OnUpdateWorld() {
     gameDifficulty = 1;
     GameDifficultyModifier(gameDifficulty);
   }
+	if(player->GetScore() >= 1500){
+		cout << endl <<  "Game Over! You have won the game and saved Earth's code!" << endl;
+		EndGame();
+		is_running = false;	
+	}
 
   // Update projectile positions
   for(auto pp: pProjectiles) {
@@ -447,7 +454,7 @@ void SFApp::DrawHud(){
   int totalBlocks = player->GetHealth() / 10;
 
   for(int i = 0; i < totalBlocks; i++) {
-    if(player->GetHealth() >= 70) {
+    if(player->GetHealth() >= 70) { 
       auto hpBlock = make_shared<SFAsset>(SFASSET_HEALTHBLOCKG, sf_window);
       auto pos = Point2(20 + (16 * i), 450);
       hpBlock->SetPosition(pos);
@@ -646,7 +653,7 @@ void SFApp::PauseGame(){
 
 void SFApp::GameDifficultyModifier(int diff) {
   cout << "Changing game stage... Stage " << diff << " of 5." << endl;
-  if(gameDifficulty < diff){
+  if(gameDifficulty < diff) {
     int number_of_aliens;
     if(diff == 1){
       number_of_aliens = 2;
@@ -660,9 +667,7 @@ void SFApp::GameDifficultyModifier(int diff) {
     else if(diff == 4){
       number_of_aliens = 9;
     }
-    else{
-      number_of_aliens = 0;
-    }
+
     for(int i = 0; i < number_of_aliens; i++) {
       // place an alien at width/number_of_aliens * i
       auto alien = make_shared<SFAsset>(SFASSET_ALIEN, sf_window);
